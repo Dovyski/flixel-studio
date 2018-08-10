@@ -13,7 +13,7 @@ using flixel.util.FlxArrayUtil;
 /**
  * TODO: add docs.
  */
-class Properties extends Sprite
+class Properties
 {
 	#if FLX_DEBUG
 	var _target:FlxObject;
@@ -21,9 +21,7 @@ class Properties extends Sprite
 
 	public function new()
 	{
-		super();
 		_target = null;
-		addEventListener(Event.ENTER_FRAME, enterFrame);
 	}
 
 	function setTarget(target:FlxObject):Void
@@ -43,14 +41,10 @@ class Properties extends Sprite
 		else
 		{
 			_window = new Tracker(profile, _target);
+			_window.x = -_window.width;
+			_window.y = 50;
 			FlxG.game.debugger.addWindow(_window);
 		}
-	}
-
-	// TODO: make FlxStudio call update for us?
-	function enterFrame(e:Event):Void
-	{
-		update();
 	}
 
 	public function update():Void {

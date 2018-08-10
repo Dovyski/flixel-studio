@@ -12,6 +12,7 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxSpriteGroup;
 import flixel.system.FlxAssets;
+import flixel.system.debug.Window;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar.FlxBarFillDirection;
 import flixel.util.FlxArrayUtil;
@@ -29,13 +30,14 @@ import flixel.addons.studio.core.Properties;
  * @author Fernando Bevilacqua <dovyski@gmail.com>
  */
 
-class FlxStudio
+class FlxStudio extends Window
 {	
 	public static var instance:FlxStudio;
 
 	var _properties:Properties;
 
-	public static function init():Void
+	// TODO: choose a good name for this
+	public static function bootstrap():Void
 	{
 		FlxStudio.instance = new FlxStudio();
 	}
@@ -45,8 +47,19 @@ class FlxStudio
 	 */
 	public function new()
 	{
+		super("FlxStudio");
+
+		visible = false;
+		_properties = new Properties();
 		addInteractionTools();
-		FlxG.addChildBelowMouse(_properties = new Properties());
+
+		FlxG.game.debugger.addWindow(this);
+	}
+
+	override public function update():Void
+	{
+		super.update();
+		_properties.update();
 	}
 
 	/**
