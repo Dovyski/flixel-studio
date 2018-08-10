@@ -21,6 +21,7 @@ import flixel.util.FlxStringUtil;
 import openfl.Assets;
 
 import flixel.addons.studio.tools.Tile;
+import flixel.addons.studio.core.Properties;
 
 /**
  * TODO: add docs
@@ -31,7 +32,8 @@ import flixel.addons.studio.tools.Tile;
 class FlxStudio
 {	
 	public static var instance:FlxStudio;
-	
+
+	var _properties:Properties;
 
 	public static function init():Void
 	{
@@ -43,10 +45,13 @@ class FlxStudio
 	 */
 	public function new()
 	{
-		FlxG.log.add("[FlxStudio] Hello world!");
 		addInteractionTools();
+		FlxG.addChildBelowMouse(_properties = new Properties());
 	}
 
+	/**
+	 * TODO: add docs
+	 */
 	function addInteractionTools():Void
 	{
 		FlxG.game.debugger.interaction.addTool(new Tile());

@@ -1,0 +1,74 @@
+package flixel.addons.studio.core;
+
+import openfl.display.Sprite;
+import openfl.events.Event;
+import flixel.FlxG;
+import flixel.FlxObject;
+import flixel.math.FlxPoint;
+import flixel.system.debug.watch.Tracker;
+
+using flixel.util.FlxStringUtil;
+using flixel.util.FlxArrayUtil;
+
+/**
+ * TODO: add docs.
+ */
+class Properties extends Sprite
+{
+	#if FLX_DEBUG
+	var _target:FlxObject;
+	var _window:Tracker;
+
+	public function new()
+	{
+		super();
+		_target = null;
+		addEventListener(Event.ENTER_FRAME, enterFrame);
+	}
+
+	function setTarget(target:FlxObject):Void
+	{
+		_target = target;
+
+		if (_window != null)
+			_window.close();
+
+		if (target == null)
+			return;
+		
+		var profile = Tracker.findProfile(_target);
+
+		if (profile == null)
+			FlxG.log.error("Could not find a tracking profile for object of class '" + target.getClassName(true) + "'."); 
+		else
+		{
+			_window = new Tracker(profile, _target);
+			FlxG.game.debugger.addWindow(_window);
+		}
+	}
+
+	// TODO: make FlxStudio call update for us?
+	function enterFrame(e:Event):Void
+	{
+		update();
+	}
+
+	public function update():Void {
+		var selectedItems = FlxG.game.debugger.interaction.selectedItems;
+
+		if(selectedItems.length != 1)
+		{
+			// TODO: show message that multiple elements cannot be tracked?
+			if(_target != null)
+				setTarget(null);
+			return;
+		}
+
+		// TODO: properly get the first selected item
+		var selectedItem = selectedItems.members[0];
+
+		if(_target != selectedItem)
+			setTarget(selectedItem);
+	}
+	#end
+}
