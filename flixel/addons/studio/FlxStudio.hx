@@ -20,6 +20,8 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxStringUtil;
 import openfl.Assets;
 
+import flixel.addons.studio.tools.Tile;
+
 /**
  * TODO: add docs
  * 
@@ -42,5 +44,11 @@ class FlxStudio
 	public function new()
 	{
 		FlxG.log.add("[FlxStudio] Hello world!");
+		addInteractionTools();
+	}
+
+	function addInteractionTools():Void
+	{
+		FlxG.game.debugger.interaction.addTool(new Tile());
 	}
 }
