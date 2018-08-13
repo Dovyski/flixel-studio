@@ -1,6 +1,8 @@
 package flixel.addons.studio.ui;
 
 import openfl.display.Sprite;
+import openfl.display.Bitmap;
+import openfl.display.BitmapData;
 import openfl.text.TextField;
 import openfl.text.TextFieldAutoSize;
 import openfl.text.TextFormat;
@@ -26,8 +28,10 @@ class EntityRow extends Sprite implements IFlxDestroyable
 	
 	public var entity:Entity;
 
+	private var _icon:Bitmap;
 	private var _nameText:TextField;
-	private var removeButton:FlxSystemButton;
+	private var _visibilityButton:FlxSystemButton;
+	private var _lockButton:FlxSystemButton;
 
 	public function new(entity:Entity)
 	{
@@ -39,12 +43,35 @@ class EntityRow extends Sprite implements IFlxDestroyable
 	private function buildUI():Void
 	{
 		_nameText = initTextField(DebuggerUtil.createTextField());
-
 		updateName();
 		
-		addChild(removeButton = new FlxSystemButton(new GraphicCloseButton(0, 0), destroy));
-		removeButton.y = (TEXT_HEIGHT - removeButton.height) / 2;
-		removeButton.alpha = 0.3;
+		_icon = createIcon();
+		_visibilityButton = createUIButton(onVisibilityClick);
+		_lockButton = createUIButton(onLockClick);
+
+		updateSize(100, 200);
+	}
+
+	private function createUIButton(upHandler:Void->Void):FlxSystemButton
+	{
+		var button = new FlxSystemButton(new GraphicCloseButton(0, 0), upHandler);
+		
+		button.y = (TEXT_HEIGHT - button.height) / 2;
+		button.alpha = 0.3;
+		addChild(button);
+
+		return button;
+	}
+
+	private function createIcon():Bitmap
+	{
+		// TODO: select icon based on entity type.
+		var data:BitmapData = new GraphicCloseButton(0, 0);
+		var icon:Bitmap = new Bitmap(data);
+		icon.y = (TEXT_HEIGHT - icon.height) / 2;
+		addChild(icon);
+
+		return icon;
 	}
 
 	private function initTextField<T:TextField>(textField:T):T
@@ -57,11 +84,25 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		return textField;
 	}
 
+	private function onVisibilityClick():Void
+	{
+		// TODO: do something
+	}
+
+	private function onLockClick():Void
+	{
+		// TODO: do something
+	}
+
 	public function updateSize(nameWidth:Float, windowWidth:Float):Void
 	{
-		var textWidth = windowWidth - removeButton.width - GUTTER;
+		var textWidth = windowWidth - _icon.width - GUTTER * 2 - _lockButton.width - GUTTER - _visibilityButton.width - GUTTER;
+
+		_icon.x = GUTTER;
+		_nameText.x = _icon.x + _icon.width + GUTTER;
 		_nameText.width = nameWidth;
-		removeButton.x = textWidth;
+		_lockButton.x = textWidth + GUTTER;
+		_visibilityButton.x = _lockButton.x + _lockButton.width + GUTTER;
 	}
 	
 	private function updateName()
@@ -84,7 +125,7 @@ class EntityRow extends Sprite implements IFlxDestroyable
 	
 	public function getMinWidth():Float
 	{
-		return _nameText.textWidth + GUTTER * 2 + removeButton.width; 
+		return _nameText.textWidth + GUTTER * 2 + _lockButton.width; 
 	}
 	
 	public function destroy()

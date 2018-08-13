@@ -54,6 +54,12 @@ class EntitiesWindow extends Window
 		updateEntriesPosition();
 	}
 
+	override public function resize(width:Float, height:Float):Void
+	{
+		super.resize(width, height);
+		updateEntriesPosition();
+	}
+
 	private function addEntry(entity:Entity, updatePosition:Bool = true):Void
 	{
 		var entry = new EntityRow(entity);
