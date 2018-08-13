@@ -1,5 +1,6 @@
 package flixel.addons.studio.ui;
 
+import flash.display.Sprite;
 import flash.display.BitmapData;
 import flash.geom.Rectangle;
 import flash.text.TextField;
@@ -14,8 +15,10 @@ using flixel.system.debug.DebuggerUtil;
  */
 class EntitiesWindow extends Window
 {
+	private static inline var LINE_HEIGHT:Int = 15;
+
+	var _entriesContainer:Sprite;
 	var _entities:Entities;
-	var _info:TextField;
 	
 	/**
 	 * Creates a new window object.
@@ -36,8 +39,46 @@ class EntitiesWindow extends Window
 		x = 100;
 		y = 100;		
 
-		_info = DebuggerUtil.createTextField(2, 15);
-		_info.text = "Hello world!";
-		addChild(_info);
+		_entriesContainer = new Sprite();
+		_entriesContainer.x = 2;
+		_entriesContainer.y = 15;
+		
+		addChild(_entriesContainer);
+	}
+
+	public function refresh():Void
+	{
+		removeExistingEntries();
+		for (entry in _entities.findAll())
+			addEntry(entry, false);
+		updateEntriesPosition();
+	}
+
+	private function addEntry(entity:Entity, updatePosition:Bool = true):Void
+	{
+		var entry = new EntityRow(Std.string(entity.type), entity);
+		_entriesContainer.addChild(entry);
+		
+		if (updatePosition)
+			updateEntriesPosition();
+	}
+
+	private function removeExistingEntries():Void
+	{
+		while (_entriesContainer.numChildren > 0)
+		{
+			var entry:EntityRow = cast _entriesContainer.getChildAt(0);
+			entry.destroy();
+		}
+	}
+
+	private function updateEntriesPosition():Void
+	{
+		for (i in 0..._entriesContainer.numChildren)
+		{
+			var entry:EntityRow = cast _entriesContainer.getChildAt(i);
+			entry.y = i * LINE_HEIGHT;
+			entry.updateSize(100, _width);
+		}
 	}
 }

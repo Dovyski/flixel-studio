@@ -29,14 +29,15 @@ class Entities
 		_list = findItems(FlxG.state.members);
 		_window = new EntitiesWindow(this);
 
+		_window.refresh();
 		FlxG.game.debugger.addWindow(_window);
-		FlxG.log.add(_list);
 	}
 
 	public function update():Void
 	{
 		// TODO: monitor changes to FlxG.state?
 	}
+
 
 	private function findItems(members:Array<FlxBasic>, level:Int = 0, maxLevel:Int = 200):Array<Entity>
 	{
@@ -69,6 +70,11 @@ class Entities
 		}
 
 		return result;
+	}
+
+	public function findAll():Array<Entity>
+	{
+		return _list;
 	}
 	#end
 }
