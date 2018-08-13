@@ -3,6 +3,8 @@ package flixel.addons.studio.ui;
 import openfl.display.Sprite;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
+import openfl.events.Event;
+import openfl.events.MouseEvent;
 import openfl.text.TextField;
 import openfl.text.TextFieldAutoSize;
 import openfl.text.TextFormat;
@@ -42,7 +44,7 @@ class EntityRow extends Sprite implements IFlxDestroyable
 	
 	private function buildUI():Void
 	{
-		_nameText = initTextField(DebuggerUtil.createTextField());
+		_nameText = initTextField(DebuggerUtil.createTextField(), onNameClick);
 		updateName();
 		
 		_icon = createIcon();
@@ -74,14 +76,23 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		return icon;
 	}
 
-	private function initTextField<T:TextField>(textField:T):T
+	private function initTextField<T:TextField>(textField:T, upHandler:Event->Void = null):T
 	{
 		textField.selectable = false;
 		textField.defaultTextFormat = new TextFormat(FlxAssets.FONT_DEBUGGER, 12, 0xFFFFFF);
 		textField.autoSize = TextFieldAutoSize.NONE;
 		textField.height = TEXT_HEIGHT;
 		addChild(textField);
+
+		if (upHandler != null)
+			textField.addEventListener(MouseEvent.CLICK, upHandler);
+
 		return textField;
+	}
+
+	private function onNameClick(e:Event):Void
+	{
+		// TODO: do something
 	}
 
 	private function onVisibilityClick():Void
@@ -125,11 +136,15 @@ class EntityRow extends Sprite implements IFlxDestroyable
 	
 	public function getMinWidth():Float
 	{
+		// TODO: check this
 		return _nameText.textWidth + GUTTER * 2 + _lockButton.width; 
 	}
 	
 	public function destroy()
 	{
 		_nameText = FlxDestroyUtil.removeChild(this, _nameText);
+		_icon = FlxDestroyUtil.removeChild(this, _icon);
+		_visibilityButton = FlxDestroyUtil.removeChild(this, _visibilityButton);
+		_lockButton = FlxDestroyUtil.removeChild(this, _lockButton);
 	}
 }
