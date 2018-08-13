@@ -25,23 +25,20 @@ class EntityRow extends Sprite implements IFlxDestroyable
 	private static inline var MAX_NAME_WIDTH = 125;
 	
 	public var entity:Entity;
-	public var displayName(default, null):String;
 
-	private var nameText:TextField;
-	private var valueText:EditableTextField;
+	private var _nameText:TextField;
 	private var removeButton:FlxSystemButton;
-	private var defaultFormat:TextFormat;
 
-	public function new(displayName:String, entity:Entity)
+	public function new(entity:Entity)
 	{
 		super();
-		
-		this.displayName = displayName;
 		this.entity = entity;
-
-		defaultFormat = new TextFormat(FlxAssets.FONT_DEBUGGER, 12, 0xFFFFFF);
-		nameText = initTextField(DebuggerUtil.createTextField());
-		valueText = initTextField(DebuggerUtil.initTextField(new EditableTextField(true, defaultFormat, submitValue)));
+		buildUI();
+	}
+	
+	private function buildUI():Void
+	{
+		_nameText = initTextField(DebuggerUtil.createTextField());
 
 		updateName();
 		
@@ -49,11 +46,11 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		removeButton.y = (TEXT_HEIGHT - removeButton.height) / 2;
 		removeButton.alpha = 0.3;
 	}
-	
+
 	private function initTextField<T:TextField>(textField:T):T
 	{
-		textField.selectable = true;
-		textField.defaultTextFormat = defaultFormat;
+		textField.selectable = false;
+		textField.defaultTextFormat = new TextFormat(FlxAssets.FONT_DEBUGGER, 12, 0xFFFFFF);
 		textField.autoSize = TextFieldAutoSize.NONE;
 		textField.height = TEXT_HEIGHT;
 		addChild(textField);
@@ -63,45 +60,35 @@ class EntityRow extends Sprite implements IFlxDestroyable
 	public function updateSize(nameWidth:Float, windowWidth:Float):Void
 	{
 		var textWidth = windowWidth - removeButton.width - GUTTER;
-		
-		nameText.width = nameWidth;
-		valueText.x = nameWidth + GUTTER;
-		valueText.width = textWidth - nameWidth - GUTTER;
+		_nameText.width = nameWidth;
 		removeButton.x = textWidth;
 	}
 	
 	private function updateName()
 	{
-		if (displayName != null)
-			setNameText(displayName);
+		if (entity != null)
+			setNameText(Std.string(entity.type));
 	}
 	
 	private function setNameText(name:String)
 	{
-		nameText.text = name;
-		var currentWidth = nameText.textWidth + 4;
-		nameText.width = Math.min(currentWidth, MAX_NAME_WIDTH);
-	}
-	
-	private function submitValue(value:String):Void
-	{
-		// TODO: do something here
+		_nameText.text = name;
+		var currentWidth = _nameText.textWidth + 4;
+		_nameText.width = Math.min(currentWidth, MAX_NAME_WIDTH);
 	}
 	
 	public function getNameWidth():Float
 	{
-		return nameText.width;
+		return _nameText.width;
 	}
 	
 	public function getMinWidth():Float
 	{
-		return valueText.x + GUTTER * 2 + removeButton.width; 
+		return _nameText.textWidth + GUTTER * 2 + removeButton.width; 
 	}
 	
 	public function destroy()
 	{
-		nameText = FlxDestroyUtil.removeChild(this, nameText);
-		FlxDestroyUtil.destroy(valueText);
-		valueText = FlxDestroyUtil.removeChild(this, valueText);
+		_nameText = FlxDestroyUtil.removeChild(this, _nameText);
 	}
 }

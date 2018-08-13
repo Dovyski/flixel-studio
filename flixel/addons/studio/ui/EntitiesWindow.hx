@@ -56,7 +56,7 @@ class EntitiesWindow extends Window
 
 	private function addEntry(entity:Entity, updatePosition:Bool = true):Void
 	{
-		var entry = new EntityRow(Std.string(entity.type), entity);
+		var entry = new EntityRow(entity);
 		_entriesContainer.addChild(entry);
 		
 		if (updatePosition)
