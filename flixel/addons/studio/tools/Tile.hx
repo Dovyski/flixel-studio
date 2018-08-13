@@ -1,119 +1,116 @@
 package flixel.addons.studio.tools;
 
-import flash.display.Sprite;
+import flash.Vector;
 import flash.display.Bitmap;
 import flash.display.BitmapData;
+import flash.display.Graphics;
 import flash.events.MouseEvent;
+import flash.text.TextField;
 import flash.ui.Keyboard;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup;
 import flixel.math.FlxPoint;
-import flixel.tile.FlxTilemap;
+import flixel.system.debug.Window;
 import flixel.system.debug.interaction.Interaction;
 import flixel.system.debug.interaction.tools.Tool;
-import flixel.system.debug.Window;
-import flixel.addons.studio.ui.Window;
+import flixel.addons.studio.tools.tile.TileSelectionWindow;
+import flixel.addons.studio.tools.tile.TilemapWindow;
+import flixel.addons.studio.tools.tile.Pointer;
+import flixel.addons.studio.tools.tile.Editor;
+import flixel.system.ui.FlxSystemButton;
+import flixel.tile.FlxTilemap;
+import flixel.util.FlxSpriteUtil;
+import openfl.display.Sprite;
 
 @:bitmap("assets/images/tools/tile.png") 
 class GraphicTileTool extends BitmapData {}
 
 /**
- * A tool to edit tilemaps. 
- * TODO: make a nice dialog to select which tilemap to edit
+ * A tool to perform some operations in tilemaps, such as adding/removing
+ * tiles, moving things around, etc. This class acts as a meta tool, because
+ * it can be added to the list of available tools in the interaction system,
+ * however it is not a tool itself. It houses smaller tilemap-related tools,
+ * centralizing its operations and data.
  * 
  * @author Fernando Bevilacqua (dovyski@gmail.com)
  * @copyright I got several ideas from here: https://github.com/LordTim/FlxTilemap-Demo
  */
 class Tile extends Tool
 {		
-	private var _tileHightligh:FlxSprite;
-	private var _tilemaps:FlxGroup;
-	private var _activeTilemap:FlxTilemap;
-	private var _properties:TilePropertiesWindow;
+	public var tilemaps(default, null):Vector<FlxTilemap> = new Vector<FlxTilemap>();
+	public var activeTilemap(default, set):Int = 0;
+	public var tileHightligh(default, null):FlxSprite;
+	public var properties(default, null):TilemapWindow;
+	public var palette(default, null):TileSelectionWindow;
 	
-	override public function init(brain:Interaction):Tool
+	override public function init(brain:Interaction):Tool 
 	{
 		super.init(brain);
-
-		_name  = "Tile";
-		setButton(GraphicTileTool);
-		setCursor(new GraphicTileTool(0, 0));
 		
-		_tilemaps = new FlxGroup();
-		_tileHightligh = new FlxSprite(); // TODO: replace this with a Sprite.
-		_properties = new TilePropertiesWindow(this);
+		_name = "Tile";
 
-		FlxG.addChildBelowMouse(_properties);
+		properties = new TilemapWindow(this, 2, 150);
+		palette = new TileSelectionWindow(this, properties.x, 250);
+		tileHightligh = new FlxSprite(); // TODO: replace this with a Sprite.		
+		FlxG.addChildBelowMouse(properties);
+		FlxG.addChildBelowMouse(palette);
+		
+		brain.addTool(new Editor(this));
 		
 		return this;
 	}
 	
-	override public function activate():Void 
+	public function refresh():Void
 	{
-		super.activate();
+		var tilemap:FlxTilemap = null;
+				
+		tilemaps.length = 0;
+		findExistingTilemaps(FlxG.state.members, tilemaps);
 		
-		// Open room for all existing tilemaps
-		_tilemaps.clear();
-		findExistingTilemaps(FlxG.state.members, _tilemaps);
+		if (tilemaps.length > 0)
+		{
+			tilemap = tilemaps[activeTilemap];
 		
-		_activeTilemap = cast _tilemaps.getFirstAlive();
+			tileHightligh.width = tilemap.width / tilemap.widthInTiles;
+			tileHightligh.height = tilemap.height / tilemap.heightInTiles;
+			tileHightligh.makeGraphic(cast tileHightligh.width, cast tileHightligh.height, 0xffff0000);
+		}
 		
-		_tileHightligh.width = _activeTilemap.width / _activeTilemap.widthInTiles;
-		_tileHightligh.height = _activeTilemap.height / _activeTilemap.heightInTiles;
-		_tileHightligh.makeGraphic(cast _tileHightligh.width, cast _tileHightligh.height, 0xffff0000);
-		
-		_properties.refresh(_activeTilemap);
+		properties.refresh(tilemap);
+		palette.refresh(tilemap);
 	}
 	
 	override public function update():Void 
 	{
 		super.update();
 		
-		if (!isActive())
-		{
-			// Tool is not active. Nothing to do here.
-			return;
-		}
-		
-		_tileHightligh.x = Math.floor(_brain.flixelPointer.x / _tileHightligh.width) * _tileHightligh.width;
-		_tileHightligh.y = Math.floor(_brain.flixelPointer.y / _tileHightligh.height) * _tileHightligh.height;
-		
-		if (_brain.pointerPressed)
-		{
-			if (_activeTilemap != null)
-			{
-				var b :Bool = _activeTilemap.setTile(Std.int(_brain.flixelPointer.x / _tileHightligh.width), Std.int(_brain.flixelPointer.y / _tileHightligh.height), _brain.keyPressed(Keyboard.DELETE) ? 0 : _properties.getSelectedTileType());
-			}
-		}
+		tileHightligh.x = Math.floor(_brain.flixelPointer.x / tileHightligh.width) * tileHightligh.width;
+		tileHightligh.y = Math.floor(_brain.flixelPointer.y / tileHightligh.height) * tileHightligh.height;
 	}
-	
+			
 	override public function draw():Void 
 	{
+		// If the tool is not active, do nothing.
 		if (!isActive())
-		{
-			// Tool is not active. Nothing to do here.
 			return;
-		}
-		
-		_tileHightligh.drawDebug();
 	}
 	
-	private function findExistingTilemaps(Members:Array<FlxBasic>, Tiles:FlxGroup):FlxTilemap
+	private function findExistingTilemaps(members:Array<FlxBasic>, tiles:Vector<FlxTilemap>):FlxTilemap
 	{
 		var i:Int = 0;
-		var size:Int = Members.length;
+		var size:Int = members.length;
 		var b:FlxBasic;
 		var target:FlxTilemap = null;
 		
 		while (i < size)
 		{
-			b = Members[i++];
+			b = members[i++];
 
 			if (b != null && b.exists && b.alive && b.visible)
 			{
 				if (Std.is(b, FlxGroup))
 				{
-					target = findExistingTilemaps((cast b).members, Tiles);
+					target = findExistingTilemaps((cast b).members, tiles);
 				}
 				else if(Std.is(b, FlxTilemap))
 				{
@@ -121,123 +118,20 @@ class Tile extends Tool
 				}
 				if (target != null)
 				{
-					Tiles.add(target);
+					tiles.push(target);
 				}
 			}
 		}
 		
 		return target;
 	}
-}
-
-class TilePropertiesWindow extends Window
-{
-	private var _tileType:Int;
-	private var _tileTool:Tile;
-	private var _tileHightligh:Sprite;
-	private var _tileSelected:Sprite;
-	private var _tilemap:FlxTilemap;
-	private var _tilemapGraphic:Sprite;
-	private var _tilemapBitmap:Bitmap;
-	private var _graphicTile:FlxPoint;
 	
-	private function initLayout():Void
+	function set_activeTilemap(value:Int)
 	{
-		_tilemapGraphic = new Sprite();
-		_tilemapBitmap = new Bitmap();
+		// TODO: check for out of bound values
+		activeTilemap = value;
+		refresh();
 		
-		_tilemapGraphic.addChild(_tilemapBitmap);
-		
-		_tilemapGraphic.y = 20;
-		_tilemapGraphic.scaleX = 2; // TODO: get values from Flixel
-		_tilemapGraphic.scaleY = 2; // TODO: get values from Flixel
-		
-		addChild(_tilemapGraphic);
-	}
-	
-	public function new(TileTool:Tile) 
-	{
-		super("Tilemap editor", new GraphicTileTool(0, 0), 200, 100);
-		_tileTool = TileTool;
-		
-		initLayout();
-		
-		_tileHightligh = new Sprite();
-		_tileHightligh.graphics.lineStyle(1, 0xff0000);
-		_tileHightligh.graphics.drawRect(0, 0, 16, 16);
-		_tileHightligh.width = 16;
-		_tileHightligh.height = 16;
-		_tileHightligh.x = 0;
-		_tileHightligh.y = 0;
-		_tileHightligh.visible = false;
-		
-		_tileSelected = new Sprite();
-		_tileSelected.graphics.lineStyle(1, 0xffff00);
-		_tileSelected.graphics.drawRect(0, 0, 16, 16);
-		_tileSelected.width = 16;
-		_tileSelected.height = 16;
-		_tileSelected.x = 0;
-		_tileSelected.y = 20;
-		
-		_graphicTile = new FlxPoint();
-		
-		addChild(_tileSelected);
-		addChild(_tileHightligh);
-		
-		reposition(2, 150);
-		
-		_tilemapGraphic.addEventListener(MouseEvent.MOUSE_MOVE, handleMouseOverGraphic);
-		_tilemapGraphic.addEventListener(MouseEvent.MOUSE_UP, handleClickGraphic);
-		_tilemapGraphic.addEventListener(MouseEvent.MOUSE_OUT, handleMouseOverGraphic);
-		
-		visible = false;
-	}
-	
-	public function refresh(Tilemap:FlxTilemap):Void
-	{
-		_tilemap = Tilemap;
-		
-		if (_tilemap != null)
-		{
-			_tilemapBitmap.bitmapData = _tilemap.frames.parent.bitmap;
-			resize(_tilemapBitmap.bitmapData.width * 2 + 10, _tilemapBitmap.bitmapData.height * 2 + _tilemapGraphic.y + 10);
-			visible = true;
-		}
-	}
-	
-	public function getSelectedTileType():Int
-	{
-		return _tileType;
-	}
-
-	private function handleMouseOverGraphic(Event:MouseEvent):Void
-	{		
-		if (Event.type == MouseEvent.MOUSE_MOVE)
-		{
-			_graphicTile.x = Math.floor(Event.localX / 8) * 8;
-			_graphicTile.y = Math.floor(Event.localY / 8) * 8;
-			
-			_tileHightligh.x = _graphicTile.x * 2;
-			_tileHightligh.y = _graphicTile.y * 2;
-			
-			_tileHightligh.y += 20;
-			_tileHightligh.visible = true;
-		}
-		else if (Event.type == MouseEvent.MOUSE_OUT)
-		{
-			_tileHightligh.visible = false;
-		}
-	}
-	
-	private function handleClickGraphic(Event:MouseEvent):Void
-	{
-		var tilesPerRow:Int = Std.int(_tilemapBitmap.bitmapData.width / 8);
-		var row:Int = Std.int(_graphicTile.y / 8);
-		var column:Int = Std.int(_graphicTile.x / 8);
-		var index = row * tilesPerRow + column;
-		
-		_tileType = index;
-		_tileSelected.x = _tileHightligh.x;
-		_tileSelected.y = _tileHightligh.y;
+		return activeTilemap;
 	}
 }
