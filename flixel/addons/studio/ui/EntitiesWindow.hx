@@ -2,16 +2,23 @@ package flixel.addons.studio.ui;
 
 import flash.display.BitmapData;
 import flash.geom.Rectangle;
+import flash.text.TextField;
+import flixel.addons.studio.core.Entities;
+
+using flixel.system.debug.DebuggerUtil;
 
 /**
  * TODO: add docs
  * 
  * @author Fernando Bevilacqua <dovyski@gmail.com>
  */
-class Window extends flixel.system.debug.Window
+class EntitiesWindow extends Window
 {
+	var _entities:Entities;
+	var _info:TextField;
+	
 	/**
-	 * Creates a new window object.  This Flash-based class is mainly (only?) used by FlxDebugger.
+	 * Creates a new window object.
 	 * 
 	 * @param   Title       The name of the window, displayed in the header bar.
 	 * @param   Icon	    The icon to use for the window header.
@@ -21,9 +28,16 @@ class Window extends flixel.system.debug.Window
 	 * @param   Bounds      A rectangle indicating the valid screen area for the window.
 	 * @param   Closable    Whether this window has a close button that removes the window.
 	 */
-	public function new(title:String, ?icon:BitmapData, width:Float = 0, height:Float = 0, resizable:Bool = true,
-		?bounds:Rectangle, closable:Bool = false)
+	public function new(entities:Entities)
 	{
-		super(title, icon, width, height, resizable, bounds, closable);
+		super("Entities", null, 200, 200, true);
+		_entities = entities;
+		
+		x = 100;
+		y = 100;		
+
+		_info = DebuggerUtil.createTextField(2, 15);
+		_info.text = "Hello world!";
+		addChild(_info);
 	}
 }

@@ -21,8 +21,8 @@ import flixel.math.FlxPoint;
 import flixel.util.FlxStringUtil;
 import openfl.Assets;
 
-import flixel.addons.studio.tools.Tile;
-import flixel.addons.studio.core.Properties;
+import flixel.addons.studio.tools.*;
+import flixel.addons.studio.core.*;
 
 /**
  * TODO: add docs
@@ -35,6 +35,7 @@ class FlxStudio extends Window
 	public static var instance:FlxStudio;
 
 	var _properties:Properties;
+	var _entities:Entities;
 
 	// TODO: choose a good name for this
 	public static function bootstrap():Void
@@ -51,6 +52,7 @@ class FlxStudio extends Window
 
 		visible = false;
 		_properties = new Properties();
+		_entities = new Entities();
 		addInteractionTools();
 
 		FlxG.game.debugger.addWindow(this);
@@ -60,6 +62,7 @@ class FlxStudio extends Window
 	{
 		super.update();
 		_properties.update();
+		_entities.update();
 	}
 
 	/**
