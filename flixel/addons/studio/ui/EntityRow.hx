@@ -18,27 +18,34 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.addons.studio.core.Entities;
+import flixel.addons.studio.ui.EntitiesWindow.EntityRowClickType;
 
 using flixel.util.FlxStringUtil;
 using flixel.system.debug.DebuggerUtil;
 
 class EntityRow extends Sprite implements IFlxDestroyable
 {
+	private static inline var HIGHLIGHT_BG_COLOR:FlxColor = 0x00FF0000;
+	private static inline var HIGHLIGHT_ALPHA:Float = 0.2;
 	private static inline var GUTTER = 4;
-	private static inline var TEXT_HEIGHT = 20;
+	private static inline var TEXT_HEIGHT = 15;
 	private static inline var MAX_NAME_WIDTH = 125;
 	
 	public var entity:Entity;
 
+	var _controllingWindow:EntitiesWindow;
 	var _icon:Bitmap;
 	var _nameText:TextField;
 	var _visibilityButton:FlxSystemButton;
 	var _lockButton:FlxSystemButton;
+	var _highlightMarker:Sprite;
+	var _highlighted:Bool;
 
-	public function new(entity:Entity)
+	public function new(entity:Entity, controllingWindow:EntitiesWindow)
 	{
 		super();
 		this.entity = entity;
+		_controllingWindow = controllingWindow;
 		buildUI();
 	}
 	
@@ -50,8 +57,25 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		_icon = createIcon();
 		_visibilityButton = createUIButton(onVisibilityClick);
 		_lockButton = createUIButton(onLockClick);
+		_highlightMarker = createHighlightMarker();
 
 		updateSize(100, 200);
+	}
+
+	function createHighlightMarker():Sprite
+	{
+		var container = new Sprite();
+		var filling = new Bitmap(new BitmapData(50, TEXT_HEIGHT, false, HIGHLIGHT_BG_COLOR));
+		
+		filling.alpha = HIGHLIGHT_ALPHA;
+		filling.x = 0;
+		filling.y = (TEXT_HEIGHT - filling.height) / 2;
+		container.visible = false;
+		
+		container.addChild(filling);
+		addChild(container);
+		
+		return container;
 	}
 
 	function createUIButton(upHandler:Void->Void):FlxSystemButton
@@ -92,7 +116,8 @@ class EntityRow extends Sprite implements IFlxDestroyable
 
 	function onNameClick(e:Event):Void
 	{
-		// TODO: do something
+		if (_controllingWindow != null)
+			_controllingWindow.onEntityRowClicked(this, EntityRowClickType.SELECT);
 	}
 
 	function onVisibilityClick():Void
@@ -105,6 +130,15 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		// TODO: do something
 	}
 
+	public function setHighlighted(status:Bool):Void
+	{
+		_highlighted = status;
+		_highlightMarker.visible = _highlighted;		
+
+		if (_highlighted)
+			_highlightMarker.width = width;
+	}
+
 	public function updateSize(nameWidth:Float, windowWidth:Float):Void
 	{
 		var textWidth = windowWidth - _icon.width - GUTTER * 2 - _lockButton.width - GUTTER - _visibilityButton.width - GUTTER;
@@ -114,6 +148,7 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		_nameText.width = nameWidth;
 		_lockButton.x = textWidth + GUTTER;
 		_visibilityButton.x = _lockButton.x + _lockButton.width + GUTTER;
+		_highlightMarker.width = width;
 	}
 	
 	function updateName()
@@ -146,5 +181,6 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		_icon = FlxDestroyUtil.removeChild(this, _icon);
 		_visibilityButton = FlxDestroyUtil.removeChild(this, _visibilityButton);
 		_lockButton = FlxDestroyUtil.removeChild(this, _lockButton);
+		_highlightMarker = FlxDestroyUtil.removeChild(this, _highlightMarker);
 	}
 }

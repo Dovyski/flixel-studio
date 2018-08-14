@@ -25,6 +25,7 @@ class EntitiesWindow extends Window
 	var _bottomBar:Sprite;	
 	var _addButton:FlxSystemButton;	
 	var _entities:Entities;
+	var _selectedEntityRow:EntityRow;
 	
 	/**
 	 * Creates a new window object.
@@ -64,6 +65,15 @@ class EntitiesWindow extends Window
 		updateEntriesPosition();
 	}
 
+	public function onEntityRowClicked(entityRow:EntityRow, type:EntityRowClickType):Void
+	{
+		if (_selectedEntityRow != null)
+			_selectedEntityRow.setHighlighted(false);
+
+		_selectedEntityRow = entityRow;
+		entityRow.setHighlighted(true);
+	}
+
 	function createEntitiesContainer():Void
 	{
 		_entriesContainer = new Sprite();
@@ -101,9 +111,9 @@ class EntitiesWindow extends Window
 
 	function addEntry(entity:Entity, updatePosition:Bool = true):Void
 	{
-		var entry = new EntityRow(entity);
+		var entry = new EntityRow(entity, this);
 		_entriesContainer.addChild(entry);
-		
+
 		if (updatePosition)
 			updateEntriesPosition();
 	}
@@ -126,4 +136,12 @@ class EntitiesWindow extends Window
 			entry.updateSize(100, _width);
 		}
 	}
+}
+
+enum EntityRowClickType {
+	SELECT;
+	LOCK;
+	UNLOCK;
+	SHOW;
+	HIDE;
 }
