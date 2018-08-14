@@ -30,10 +30,10 @@ class EntityRow extends Sprite implements IFlxDestroyable
 	
 	public var entity:Entity;
 
-	private var _icon:Bitmap;
-	private var _nameText:TextField;
-	private var _visibilityButton:FlxSystemButton;
-	private var _lockButton:FlxSystemButton;
+	var _icon:Bitmap;
+	var _nameText:TextField;
+	var _visibilityButton:FlxSystemButton;
+	var _lockButton:FlxSystemButton;
 
 	public function new(entity:Entity)
 	{
@@ -42,7 +42,7 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		buildUI();
 	}
 	
-	private function buildUI():Void
+	function buildUI():Void
 	{
 		_nameText = initTextField(DebuggerUtil.createTextField(), onNameClick);
 		updateName();
@@ -54,7 +54,7 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		updateSize(100, 200);
 	}
 
-	private function createUIButton(upHandler:Void->Void):FlxSystemButton
+	function createUIButton(upHandler:Void->Void):FlxSystemButton
 	{
 		var button = new FlxSystemButton(new GraphicCloseButton(0, 0), upHandler);
 		
@@ -65,7 +65,7 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		return button;
 	}
 
-	private function createIcon():Bitmap
+	function createIcon():Bitmap
 	{
 		// TODO: select icon based on entity type.
 		var data:BitmapData = new GraphicCloseButton(0, 0);
@@ -76,7 +76,7 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		return icon;
 	}
 
-	private function initTextField<T:TextField>(textField:T, upHandler:Event->Void = null):T
+	function initTextField<T:TextField>(textField:T, upHandler:Event->Void = null):T
 	{
 		textField.selectable = false;
 		textField.defaultTextFormat = new TextFormat(FlxAssets.FONT_DEBUGGER, 12, 0xFFFFFF);
@@ -90,17 +90,17 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		return textField;
 	}
 
-	private function onNameClick(e:Event):Void
+	function onNameClick(e:Event):Void
 	{
 		// TODO: do something
 	}
 
-	private function onVisibilityClick():Void
+	function onVisibilityClick():Void
 	{
 		// TODO: do something
 	}
 
-	private function onLockClick():Void
+	function onLockClick():Void
 	{
 		// TODO: do something
 	}
@@ -116,13 +116,13 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		_visibilityButton.x = _lockButton.x + _lockButton.width + GUTTER;
 	}
 	
-	private function updateName()
+	function updateName()
 	{
 		if (entity != null)
 			setNameText(Std.string(entity.type));
 	}
 	
-	private function setNameText(name:String)
+	function setNameText(name:String)
 	{
 		_nameText.text = name;
 		var currentWidth = _nameText.textWidth + 4;
