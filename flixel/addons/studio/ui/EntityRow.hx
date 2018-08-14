@@ -18,7 +18,6 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.addons.studio.core.Entities;
-import flixel.addons.studio.ui.EntitiesWindow.EntityRowClickType;
 
 using flixel.util.FlxStringUtil;
 using flixel.system.debug.DebuggerUtil;
@@ -51,12 +50,18 @@ class EntityRow extends Sprite implements IFlxDestroyable
 	
 	function buildUI():Void
 	{
-		_nameText = initTextField(DebuggerUtil.createTextField(), onNameClick);
+		_nameText = initTextField(DebuggerUtil.createTextField(), function(e:Event):Void {
+			FlxStudio.instance.entityRowSelected.dispatch(this);
+		});
 		updateName();
 		
 		_icon = createIcon();
-		_visibilityButton = createUIButton(onVisibilityClick);
-		_lockButton = createUIButton(onLockClick);
+		_visibilityButton = createUIButton(function():Void {
+			FlxStudio.instance.entityVisibilityButtonClicked.dispatch(this);
+		});
+		_lockButton = createUIButton(function():Void {
+			FlxStudio.instance.entityLockButtonClicked.dispatch(this);
+		});
 		_highlightMarker = createHighlightMarker();
 
 		updateSize(100, 200);
@@ -71,6 +76,7 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		filling.x = 0;
 		filling.y = (TEXT_HEIGHT - filling.height) / 2;
 		container.visible = false;
+		container.mouseEnabled = false;
 		
 		container.addChild(filling);
 		addChild(container);
@@ -112,22 +118,6 @@ class EntityRow extends Sprite implements IFlxDestroyable
 			textField.addEventListener(MouseEvent.CLICK, upHandler);
 
 		return textField;
-	}
-
-	function onNameClick(e:Event):Void
-	{
-		if (_controllingWindow != null)
-			_controllingWindow.onEntityRowClicked(this, EntityRowClickType.SELECT);
-	}
-
-	function onVisibilityClick():Void
-	{
-		// TODO: do something
-	}
-
-	function onLockClick():Void
-	{
-		// TODO: do something
 	}
 
 	public function setHighlighted(status:Bool):Void

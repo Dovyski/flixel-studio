@@ -21,23 +21,14 @@ using flixel.util.FlxArrayUtil;
 class Entities
 {
 	var _list:Array<Entity>;
-	var _window:EntitiesWindow;
 	
 	#if FLX_DEBUG
 	public function new()
 	{
 		_list = findItems(FlxG.state.members);
-		_window = new EntitiesWindow(this);
-
-		_window.refresh();
-		FlxG.game.debugger.addWindow(_window);
 	}
 
-	public function update():Void
-	{
-		// TODO: monitor changes to FlxG.state?
-	}
-
+	public function update():Void {}
 
 	private function findItems(members:Array<FlxBasic>, level:Int = 0, maxLevel:Int = 200):Array<Entity>
 	{

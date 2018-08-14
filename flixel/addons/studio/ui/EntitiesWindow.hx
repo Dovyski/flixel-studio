@@ -65,17 +65,6 @@ class EntitiesWindow extends Window
 		updateEntriesPosition();
 	}
 
-	public function onEntityRowClicked(entityRow:EntityRow, type:EntityRowClickType):Void
-	{
-		switch(type)
-		{
-			case SELECT:
-				selectEntityRow(entityRow);
-			case _:
-				FlxG.log.add("onEntityRowClicked(" + type + ")");
-		}
-	}
-
 	public function selectEntityRow(entityRow:EntityRow):Void
 	{
 		if (_selectedEntityRow != null)
@@ -123,18 +112,15 @@ class EntitiesWindow extends Window
 		_bottomBar.x = 0;
 		_bottomBar.y = height - 15;
 
-		_addButton = new FlxSystemButton(new GraphicCloseButton(0, 0), onAddClick);
+		_addButton = new FlxSystemButton(new GraphicCloseButton(0, 0), function():Void {
+			FlxStudio.instance.entitiesAddButtonClicked.dispatch();
+		});
 		_addButton.x = GUTTER;
 		_addButton.alpha = 0.3;
 		
 		_bottomBar.addChild(_addButton);
 		addChild(_bottomBar);
 	}
-
-	function onAddClick():Void
-	{
-		// TODO: do something here
-	} 
 
 	function addEntry(entity:Entity, updatePosition:Bool = true):Void
 	{
@@ -163,12 +149,4 @@ class EntitiesWindow extends Window
 			entry.updateSize(100, _width);
 		}
 	}
-}
-
-enum EntityRowClickType {
-	SELECT;
-	LOCK;
-	UNLOCK;
-	SHOW;
-	HIDE;
 }

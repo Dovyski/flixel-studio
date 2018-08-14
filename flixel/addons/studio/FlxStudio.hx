@@ -17,12 +17,15 @@ import flixel.text.FlxText;
 import flixel.ui.FlxBar.FlxBarFillDirection;
 import flixel.util.FlxArrayUtil;
 import flixel.util.FlxColor;
-import flixel.math.FlxPoint;
 import flixel.util.FlxStringUtil;
+import flixel.util.FlxSignal.FlxTypedSignal;
+import flixel.util.FlxSignal;
+import flixel.math.FlxPoint;
 import openfl.Assets;
 
 import flixel.addons.studio.tools.*;
 import flixel.addons.studio.core.*;
+import flixel.addons.studio.ui.*;
 
 /**
  * TODO: add docs
@@ -36,6 +39,12 @@ class FlxStudio extends Window
 
 	var _properties:Properties;
 	var _entities:Entities;
+	var _entitiesWindow:EntitiesWindow;	
+
+	public var entityRowSelected:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
+	public var entityVisibilityButtonClicked:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
+	public var entityLockButtonClicked:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
+	public var entitiesAddButtonClicked:FlxSignal = new FlxSignal();	
 
 	// TODO: choose a good name for this
 	public static function bootstrap():Void
@@ -53,7 +62,10 @@ class FlxStudio extends Window
 		visible = false;
 		_properties = new Properties();
 		_entities = new Entities();
+
 		addInteractionTools();
+		initSignals();
+		initUI();		
 
 		FlxG.game.debugger.addWindow(this);
 	}
@@ -65,6 +77,14 @@ class FlxStudio extends Window
 		_entities.update();
 	}
 
+	function initUI():Void 
+	{
+		_entitiesWindow = new EntitiesWindow(_entities);
+		_entitiesWindow.refresh();
+		
+		FlxG.game.debugger.addWindow(_entitiesWindow);	
+	}
+
 	/**
 	 * TODO: add docs
 	 */
@@ -72,4 +92,17 @@ class FlxStudio extends Window
 	{
 		FlxG.game.debugger.interaction.addTool(new Tile());
 	}
+
+	/**
+	 * TODO: add docs
+	 */
+	function initSignals():Void
+	{
+		entityRowSelected.add(onEntityRowSelected);
+	}
+
+	function onEntityRowSelected(entityRow:EntityRow):Void
+	{
+		_entitiesWindow.selectEntityRow(entityRow);
+	}	
 }
