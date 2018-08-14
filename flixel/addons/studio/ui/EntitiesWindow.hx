@@ -67,11 +67,38 @@ class EntitiesWindow extends Window
 
 	public function onEntityRowClicked(entityRow:EntityRow, type:EntityRowClickType):Void
 	{
+		switch(type)
+		{
+			case SELECT:
+				selectEntityRow(entityRow);
+			case _:
+				FlxG.log.add("onEntityRowClicked(" + type + ")");
+		}
+	}
+
+	public function selectEntityRow(entityRow:EntityRow):Void
+	{
 		if (_selectedEntityRow != null)
 			_selectedEntityRow.setHighlighted(false);
 
 		_selectedEntityRow = entityRow;
-		entityRow.setHighlighted(true);
+
+		if (_selectedEntityRow == null)
+			return;
+		
+		_selectedEntityRow.setHighlighted(true);
+		var entity = _selectedEntityRow.entity;
+
+		// Make sure nothing is selected on the screen after
+		// an entity row is clicked
+		FlxG.game.debugger.interaction.clearSelection();
+
+		if (entity.type == EntityType.SPRITE)
+			FlxG.game.debugger.interaction.selectedItems.add(cast entity.reference);
+		else if (entity.type == EntityType.TILEMAP)
+		{
+			// TODO: select tile tool and make clicked tile the active one`
+		}
 	}
 
 	function createEntitiesContainer():Void
