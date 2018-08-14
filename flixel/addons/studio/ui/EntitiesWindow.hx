@@ -43,8 +43,8 @@ class EntitiesWindow extends Window
 		super("Entities", null, 200, 200, true);
 		_entities = entities;
 		
-		x = 100;
-		y = 100;		
+		x = 5;
+		y = FlxG.game.height - height;
 
 		createEntitiesContainer();
 		createTopBar();

@@ -41,7 +41,7 @@ class Properties
 		else
 		{
 			_window = new Tracker(profile, _target);
-			_window.x = -_window.width;
+			_window.x = FlxG.game.width - _window.width;
 			_window.y = 50;
 			FlxG.game.debugger.addWindow(_window);
 		}

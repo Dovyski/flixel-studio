@@ -25,5 +25,6 @@ class Window extends flixel.system.debug.Window
 		?bounds:Rectangle, closable:Bool = false)
 	{
 		super(title, icon, width, height, resizable, bounds, closable);
+		visible = true;
 	}
 }
