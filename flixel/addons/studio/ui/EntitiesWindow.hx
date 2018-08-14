@@ -4,6 +4,8 @@ import flash.display.Sprite;
 import flash.display.BitmapData;
 import flash.geom.Rectangle;
 import flash.text.TextField;
+import flixel.system.ui.FlxSystemButton;
+import flixel.system.debug.FlxDebugger.GraphicCloseButton;
 import flixel.addons.studio.core.Entities;
 
 using flixel.system.debug.DebuggerUtil;
@@ -16,8 +18,12 @@ using flixel.system.debug.DebuggerUtil;
 class EntitiesWindow extends Window
 {
 	private static inline var LINE_HEIGHT:Int = 15;
+	private static inline var GUTTER = 4;
 
 	var _entriesContainer:Sprite;
+	var _topBar:Sprite;	
+	var _bottomBar:Sprite;	
+	var _addButton:FlxSystemButton;	
 	var _entities:Entities;
 	
 	/**
@@ -39,11 +45,9 @@ class EntitiesWindow extends Window
 		x = 100;
 		y = 100;		
 
-		_entriesContainer = new Sprite();
-		_entriesContainer.x = 2;
-		_entriesContainer.y = 15;
-		
-		addChild(_entriesContainer);
+		createEntitiesContainer();
+		createTopBar();
+		createBottomBar();
 	}
 
 	public function refresh():Void
@@ -60,7 +64,42 @@ class EntitiesWindow extends Window
 		updateEntriesPosition();
 	}
 
-	private function addEntry(entity:Entity, updatePosition:Bool = true):Void
+	function createEntitiesContainer():Void
+	{
+		_entriesContainer = new Sprite();
+		_entriesContainer.x = 0;
+		_entriesContainer.y = 30;
+		addChild(_entriesContainer);
+	}
+
+	function createTopBar():Void
+	{
+		_topBar = new Sprite();
+		_topBar.x = 0;
+		_topBar.y = 15;
+		addChild(_topBar);
+	}
+
+	function createBottomBar():Void
+	{
+		_bottomBar = new Sprite();
+		_bottomBar.x = 0;
+		_bottomBar.y = height - 15;
+
+		_addButton = new FlxSystemButton(new GraphicCloseButton(0, 0), onAddClick);
+		_addButton.x = GUTTER;
+		_addButton.alpha = 0.3;
+		
+		_bottomBar.addChild(_addButton);
+		addChild(_bottomBar);
+	}
+
+	function onAddClick():Void
+	{
+		// TODO: do something here
+	} 
+
+	function addEntry(entity:Entity, updatePosition:Bool = true):Void
 	{
 		var entry = new EntityRow(entity);
 		_entriesContainer.addChild(entry);
@@ -69,7 +108,7 @@ class EntitiesWindow extends Window
 			updateEntriesPosition();
 	}
 
-	private function removeExistingEntries():Void
+	function removeExistingEntries():Void
 	{
 		while (_entriesContainer.numChildren > 0)
 		{
@@ -78,7 +117,7 @@ class EntitiesWindow extends Window
 		}
 	}
 
-	private function updateEntriesPosition():Void
+	function updateEntriesPosition():Void
 	{
 		for (i in 0..._entriesContainer.numChildren)
 		{
