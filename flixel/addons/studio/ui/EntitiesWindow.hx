@@ -15,7 +15,7 @@ using flixel.system.debug.DebuggerUtil;
  * 
  * @author Fernando Bevilacqua <dovyski@gmail.com>
  */
-class EntitiesWindow extends Window
+class EntitiesWindow extends StackableWindow
 {
 	private static inline var LINE_HEIGHT:Int = 15;
 	private static inline var GUTTER = 4;
@@ -95,7 +95,7 @@ class EntitiesWindow extends Window
 		_entriesContainer = new Sprite();
 		_entriesContainer.x = 0;
 		_entriesContainer.y = 30;
-		addChild(_entriesContainer);
+		addChildContent(_entriesContainer);
 	}
 
 	function createTopBar():Void
@@ -103,7 +103,7 @@ class EntitiesWindow extends Window
 		_topBar = new Sprite();
 		_topBar.x = 0;
 		_topBar.y = 15;
-		addChild(_topBar);
+		addChildContent(_topBar);
 	}
 
 	function createBottomBar():Void
@@ -119,7 +119,7 @@ class EntitiesWindow extends Window
 		_addButton.alpha = 0.3;
 		
 		_bottomBar.addChild(_addButton);
-		addChild(_bottomBar);
+		addChildContent(_bottomBar);
 	}
 
 	function addEntry(entity:Entity, updatePosition:Bool = true):Void

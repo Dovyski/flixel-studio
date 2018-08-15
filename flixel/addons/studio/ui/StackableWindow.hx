@@ -11,10 +11,10 @@ import flash.geom.Rectangle;
  * 
  * @author Fernando Bevilacqua <dovyski@gmail.com>
  */
-class Window extends flixel.system.debug.Window
+class StackableWindow extends flixel.system.debug.Window
 {
-	var _siblingLeft:Window;
-	var _siblingRight:Window;
+	var _siblingLeft:StackableWindow;
+	var _siblingRight:StackableWindow;
 	var _content:Sprite;
 	var _featured:Bool;
 	
@@ -34,6 +34,7 @@ class Window extends flixel.system.debug.Window
 	{
 		super(title, icon, width, height, resizable, bounds, closable);
 		visible = true;
+		_featured = true;
 		
 		_content = new Sprite();
 		_content.x = 0;
@@ -41,7 +42,7 @@ class Window extends flixel.system.debug.Window
 		addChild(_content);
 	}
 
-	function setFeatured(status:Bool):Void
+	function setFeatured(status:Bool, force:Bool = false):Void
 	{
 		if (_featured == status)
 			return;
@@ -49,7 +50,6 @@ class Window extends flixel.system.debug.Window
 		_featured = status;
 		_content.visible = status;
 		_shadow.visible = status;
-		_background.visible = status;
 		_background.visible = status;
 		_title.border = status;
 		_title.borderColor = 0xff0000;
@@ -77,7 +77,7 @@ class Window extends flixel.system.debug.Window
 			_siblingLeft.updateBasedOnSibling(this, false);
 	}
 
-	function updateBasedOnSibling(commander:Window, toTheRight:Bool = true, offsetX:Float = 0):Void
+	function updateBasedOnSibling(commander:StackableWindow, toTheRight:Bool = true, offsetX:Float = 0):Void
 	{
 		// Decide on the next sibling based on the informed flow,
 		// i.e. to the right or to the left.
@@ -103,15 +103,14 @@ class Window extends flixel.system.debug.Window
 		var head = getLastLeftSibling();
 		var contentSize = getMaxWidthAmongSiblings();
 
-		_content.scaleX = contentSize;
 		_content.x = head.x - x;
-		_background.scaleX = _content.scaleX;
+		_background.scaleX = contentSize;
 		_background.x = _content.x;
-		_shadow.scaleX = _content.scaleX;
-		_shadow.x = _content.x;
+		_shadow.scaleX = _background.scaleX;
+		_shadow.x = _background.x;
 
 		if (_resizable)
-			_handle.x = _background.x + _background.width - _handle.width;
+			_handle.x = _content.x + _background.width - _handle.width;
 	}
 
 	function getMaxWidthAmongSiblings():Float
@@ -163,7 +162,7 @@ class Window extends flixel.system.debug.Window
 		return _siblingLeft != null || _siblingRight != null;
 	}
 
-	public function attachTo(target:Window):Void
+	public function attachTo(target:StackableWindow):Void
 	{
 		if (target == null)
 			throw "target window to be attached to must not be null";
@@ -187,9 +186,9 @@ class Window extends flixel.system.debug.Window
 		// TODO: implement this
 	}
 
-	public function getLastRightSibling():Window
+	public function getLastRightSibling():StackableWindow
 	{
-		var sibling:Window = _siblingRight;
+		var sibling:StackableWindow = _siblingRight;
 		while (sibling != null)
 		{
 			if (sibling._siblingRight == null)
@@ -200,9 +199,9 @@ class Window extends flixel.system.debug.Window
 		return sibling == null ? this : sibling;
 	}
 
-	public function getLastLeftSibling():Window
+	public function getLastLeftSibling():StackableWindow
 	{
-		var sibling:Window = _siblingLeft;
+		var sibling:StackableWindow = _siblingLeft;
 		while (sibling != null)
 		{
 			if (sibling._siblingLeft == null)
