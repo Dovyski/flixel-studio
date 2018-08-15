@@ -24,6 +24,8 @@ class EntitiesWindow extends StackableWindow
 	var _topBar:Sprite;	
 	var _bottomBar:Sprite;	
 	var _addButton:FlxSystemButton;	
+	var _visibilityButton:FlxSystemButton;	
+	var _lockButton:FlxSystemButton;	
 	var _entities:Entities;
 	var _selectedEntityRow:EntityRow;
 	
@@ -90,7 +92,23 @@ class EntitiesWindow extends StackableWindow
 	{
 		_topBar = new Sprite();
 		_topBar.x = 0;
-		_topBar.y = 15;
+		_topBar.y = 20;
+
+		_visibilityButton = new FlxSystemButton(new GraphicCloseButton(0, 0), function():Void {
+			FlxStudio.instance.entitiesVisibilityButtonClicked.dispatch();
+		});
+		_visibilityButton.x = width - 36; // TODO: better position this
+		_visibilityButton.alpha = 0.3;
+
+		_lockButton = new FlxSystemButton(new GraphicCloseButton(0, 0), function():Void {
+			FlxStudio.instance.entitiesLockButtonClicked.dispatch();
+		});
+		_lockButton.x = _visibilityButton.x + _visibilityButton.width + GUTTER;
+		_lockButton.alpha = 0.3;
+
+		_topBar.addChild(_visibilityButton);
+		_topBar.addChild(_lockButton);
+
 		addChildContent(_topBar);
 	}
 

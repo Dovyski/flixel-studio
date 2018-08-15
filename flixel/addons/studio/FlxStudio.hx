@@ -46,6 +46,8 @@ class FlxStudio extends flixel.system.debug.Window
 	public var entityVisibilityButtonClicked:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
 	public var entityLockButtonClicked:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
 	public var entitiesAddButtonClicked:FlxSignal = new FlxSignal();
+	public var entitiesVisibilityButtonClicked:FlxSignal = new FlxSignal();
+	public var entitiesLockButtonClicked:FlxSignal = new FlxSignal();	
 
 	// TODO: choose a good name for this
 	public static function bootstrap():Void
