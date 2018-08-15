@@ -12,7 +12,7 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxSpriteGroup;
 import flixel.system.FlxAssets;
-import flixel.system.debug.Window;
+import flixel.system.debug.interaction.tools.Tool;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar.FlxBarFillDirection;
 import flixel.util.FlxArrayUtil;
@@ -25,6 +25,7 @@ import openfl.Assets;
 
 import flixel.addons.studio.tools.*;
 import flixel.addons.studio.core.*;
+import flixel.addons.studio.core.Entities.EntityType;
 import flixel.addons.studio.ui.*;
 
 /**
@@ -33,7 +34,7 @@ import flixel.addons.studio.ui.*;
  * @author Fernando Bevilacqua <dovyski@gmail.com>
  */
 
-class FlxStudio extends Window
+class FlxStudio extends flixel.system.debug.Window
 {	
 	public static var instance:FlxStudio;
 
@@ -44,7 +45,7 @@ class FlxStudio extends Window
 	public var entityRowSelected:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
 	public var entityVisibilityButtonClicked:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
 	public var entityLockButtonClicked:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
-	public var entitiesAddButtonClicked:FlxSignal = new FlxSignal();	
+	public var entitiesAddButtonClicked:FlxSignal = new FlxSignal();
 
 	// TODO: choose a good name for this
 	public static function bootstrap():Void
@@ -101,8 +102,32 @@ class FlxStudio extends Window
 		entityRowSelected.add(onEntityRowSelected);
 	}
 
+	function selectInteractionTool(className:Class<Tool>):Void
+	{
+		var tool = FlxG.game.debugger.interaction.getTool(className);
+		FlxG.game.debugger.interaction.setActiveTool(tool);
+	}
+
 	function onEntityRowSelected(entityRow:EntityRow):Void
 	{
 		_entitiesWindow.selectEntityRow(entityRow);
+
+		var entity = entityRow.entity;
+		var interaction = FlxG.game.debugger.interaction;
+
+		// Make sure nothing is selected on the screen after
+		// an entity row is clicked
+		interaction.clearSelection();
+
+		if (entity.type == EntityType.SPRITE)
+		{
+			selectInteractionTool(flixel.system.debug.interaction.tools.Pointer);
+			interaction.selectedItems.add(cast entity.reference);
+		}
+		else if (entity.type == EntityType.TILEMAP)
+		{
+			selectInteractionTool(flixel.addons.studio.tools.tile.Editor);
+			// TODO: select the proper tilemap.
+		}
 	}	
 }

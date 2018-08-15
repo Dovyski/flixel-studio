@@ -46,13 +46,16 @@ class EntityRow extends Sprite implements IFlxDestroyable
 		this.entity = entity;
 		_controllingWindow = controllingWindow;
 		buildUI();
+
+		addEventListener(MouseEvent.CLICK, function(e:Event):Void {
+			e.preventDefault();
+			FlxStudio.instance.entityRowSelected.dispatch(this);
+		});
 	}
 	
 	function buildUI():Void
 	{
-		_nameText = initTextField(DebuggerUtil.createTextField(), function(e:Event):Void {
-			FlxStudio.instance.entityRowSelected.dispatch(this);
-		});
+		_nameText = initTextField(DebuggerUtil.createTextField());
 		updateName();
 		
 		_icon = createIcon();

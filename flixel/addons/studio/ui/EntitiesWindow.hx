@@ -76,18 +76,6 @@ class EntitiesWindow extends StackableWindow
 			return;
 		
 		_selectedEntityRow.setHighlighted(true);
-		var entity = _selectedEntityRow.entity;
-
-		// Make sure nothing is selected on the screen after
-		// an entity row is clicked
-		FlxG.game.debugger.interaction.clearSelection();
-
-		if (entity.type == EntityType.SPRITE)
-			FlxG.game.debugger.interaction.selectedItems.add(cast entity.reference);
-		else if (entity.type == EntityType.TILEMAP)
-		{
-			// TODO: select tile tool and make clicked tile the active one`
-		}
 	}
 
 	function createEntitiesContainer():Void
