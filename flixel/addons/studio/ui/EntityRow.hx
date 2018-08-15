@@ -18,6 +18,12 @@ import flixel.util.FlxColor;
 import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.addons.studio.core.Entities;
+import flixel.addons.studio.core.Entities.EntityType;
+import flixel.addons.studio.ui.EntitiesWindow.GraphicSpriteIcon;
+import flixel.addons.studio.ui.EntitiesWindow.GraphicTilemapIcon;
+import flixel.addons.studio.ui.EntitiesWindow.GraphicEmitterIcon;
+import flixel.addons.studio.ui.EntitiesWindow.GraphicGroupIcon;
+import flixel.addons.studio.ui.EntitiesWindow.GraphicDotIcon;
 
 using flixel.util.FlxStringUtil;
 using flixel.system.debug.DebuggerUtil;
@@ -89,7 +95,7 @@ class EntityRow extends Sprite implements IFlxDestroyable
 
 	function createUIButton(upHandler:Void->Void):FlxSystemButton
 	{
-		var button = new FlxSystemButton(new GraphicCloseButton(0, 0), upHandler);
+		var button = new FlxSystemButton(new GraphicDotIcon(0, 0), upHandler);
 		
 		button.y = (TEXT_HEIGHT - button.height) / 2;
 		button.alpha = 0.3;
@@ -100,9 +106,18 @@ class EntityRow extends Sprite implements IFlxDestroyable
 
 	function createIcon():Bitmap
 	{
-		// TODO: select icon based on entity type.
-		var data:BitmapData = new GraphicCloseButton(0, 0);
-		var icon:Bitmap = new Bitmap(data);
+		var data:BitmapData;
+		var icon:Bitmap;
+		
+		switch (entity.type)
+		{
+			case EntityType.SPRITE:  data = new GraphicSpriteIcon(0, 0);
+			case EntityType.TILEMAP: data = new GraphicTilemapIcon(0, 0);
+			case EntityType.EMITTER: data = new GraphicEmitterIcon(0, 0);
+			case EntityType.GROUP:   data = new GraphicGroupIcon(0, 0);
+		}
+
+		icon = new Bitmap(data);		
 		icon.y = (TEXT_HEIGHT - icon.height) / 2;
 		addChild(icon);
 

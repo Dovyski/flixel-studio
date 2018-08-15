@@ -10,6 +10,30 @@ import flixel.addons.studio.core.Entities;
 
 using flixel.system.debug.DebuggerUtil;
 
+@:bitmap("assets/images/icons/emitter.png") 
+class GraphicEmitterIcon extends BitmapData {}
+
+@:bitmap("assets/images/icons/group.png") 
+class GraphicGroupIcon extends BitmapData {}
+
+@:bitmap("assets/images/icons/lock.png") 
+class GraphicLockIcon extends BitmapData {}
+
+@:bitmap("assets/images/icons/sprite.png") 
+class GraphicSpriteIcon extends BitmapData {}
+
+@:bitmap("assets/images/icons/tilemap.png") 
+class GraphicTilemapIcon extends BitmapData {}
+
+@:bitmap("assets/images/icons/visibility.png") 
+class GraphicVisilityIcon extends BitmapData {}
+
+@:bitmap("assets/images/icons/x.png") 
+class GraphicXIcon extends BitmapData {}
+
+@:bitmap("assets/images/icons/dot.png") 
+class GraphicDotIcon extends BitmapData {}
+
 /**
  * TODO: add docs
  * 
@@ -94,17 +118,17 @@ class EntitiesWindow extends StackableWindow
 		_topBar.x = 0;
 		_topBar.y = 20;
 
-		_visibilityButton = new FlxSystemButton(new GraphicCloseButton(0, 0), function():Void {
+		_visibilityButton = new FlxSystemButton(new GraphicVisilityIcon(0, 0), function():Void {
 			FlxStudio.instance.entitiesVisibilityButtonClicked.dispatch();
 		});
-		_visibilityButton.x = width - 36; // TODO: better position this
-		_visibilityButton.alpha = 0.3;
+		_visibilityButton.x = width - 42; // TODO: better position this
+		_visibilityButton.alpha = 0.7;
 
-		_lockButton = new FlxSystemButton(new GraphicCloseButton(0, 0), function():Void {
+		_lockButton = new FlxSystemButton(new GraphicLockIcon(0, 0), function():Void {
 			FlxStudio.instance.entitiesLockButtonClicked.dispatch();
 		});
 		_lockButton.x = _visibilityButton.x + _visibilityButton.width + GUTTER;
-		_lockButton.alpha = 0.3;
+		_lockButton.alpha = 0.7;
 
 		_topBar.addChild(_visibilityButton);
 		_topBar.addChild(_lockButton);
@@ -122,7 +146,7 @@ class EntitiesWindow extends StackableWindow
 			FlxStudio.instance.entitiesAddButtonClicked.dispatch();
 		});
 		_addButton.x = GUTTER;
-		_addButton.alpha = 0.3;
+		_addButton.alpha = 0.7;
 		
 		_bottomBar.addChild(_addButton);
 		addChildContent(_bottomBar);
