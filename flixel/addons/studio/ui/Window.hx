@@ -1,6 +1,9 @@
 package flixel.addons.studio.ui;
 
+import flash.display.Sprite;
 import flash.display.BitmapData;
+import flash.display.DisplayObject;
+import flash.events.MouseEvent;
 import flash.geom.Rectangle;
 
 /**
@@ -12,6 +15,8 @@ class Window extends flixel.system.debug.Window
 {
 	var _siblingLeft:Window;
 	var _siblingRight:Window;
+	var _content:Sprite;
+	var _featured:Bool;
 	
 	/**
 	 * Creates a new window object.  This Flash-based class is mainly (only?) used by FlxDebugger.
@@ -29,6 +34,47 @@ class Window extends flixel.system.debug.Window
 	{
 		super(title, icon, width, height, resizable, bounds, closable);
 		visible = true;
+		
+		_content = new Sprite();
+		_content.x = 0;
+		_content.y = 0;
+		addChild(_content);
+	}
+
+	function setFeatured(status:Bool):Void
+	{
+		if (_featured == status)
+			return;
+
+		_featured = status;
+		_content.visible = status;
+		_shadow.visible = status;
+		_background.visible = status;
+		_background.visible = status;
+		_title.border = status;
+		_title.borderColor = 0xff0000;
+
+		if (_resizable)
+			_handle.visible = status;
+	}
+
+	override function onMouseDown(?e:MouseEvent):Void
+	{
+		super.onMouseDown(e);
+
+		if (hasSiblings() && _overHeader)
+		{
+			setFeatured(true);
+			refreshSiblings();
+		}
+	}
+
+	function refreshSiblings():Void
+	{
+		if (_siblingRight != null)
+			_siblingRight.updateBasedOnSibling(this, true, getTitleTabWidth());
+		if (_siblingLeft != null)
+			_siblingLeft.updateBasedOnSibling(this, false);
 	}
 
 	function updateBasedOnSibling(commander:Window, toTheRight:Bool = true, offsetX:Float = 0):Void
@@ -48,16 +94,63 @@ class Window extends flixel.system.debug.Window
 
 		if (next != null)
 			next.updateBasedOnSibling(commander, toTheRight, nextOffsetX);
+
+		setFeatured(false);
+	}
+
+	function adjustLayout():Void
+	{
+		var head = getLastLeftSibling();
+		var contentSize = getMaxWidthAmongSiblings();
+
+		_content.scaleX = contentSize;
+		_content.x = head.x - x;
+		_background.scaleX = _content.scaleX;
+		_background.x = _content.x;
+		_shadow.scaleX = _content.scaleX;
+		_shadow.x = _content.x;
+
+		if (_resizable)
+			_handle.x = _background.x + _background.width - _handle.width;
+	}
+
+	function getMaxWidthAmongSiblings():Float
+	{
+		var head = getLastLeftSibling();
+		var maxWidth:Float = head.x + head._width;
+		var sibling = head._siblingRight;
+
+		while (sibling != null)
+		{
+			maxWidth = Math.max(maxWidth, sibling.x + sibling._width);
+			sibling = sibling._siblingRight;
+		}
+
+		return maxWidth - head.x;
+	}
+
+	function adjustLayoutOfRightSiblings():Void
+	{
+		var sibling = _siblingRight;
+
+		while (sibling != null)
+		{
+			sibling.adjustLayout();
+			sibling = sibling._siblingRight;
+		}
+	}
+
+	public function addChildContent(child:DisplayObject):DisplayObject
+	{
+		return _content.addChild(child);
 	}
 
 	override public function reposition(x:Float, y:Float):Void
 	{
 		super.reposition(x, y);
-
-		if (_siblingRight != null)
-			_siblingRight.updateBasedOnSibling(this, true, getTitleTabWidth());
-		if (_siblingLeft != null)
-			_siblingLeft.updateBasedOnSibling(this, false);
+		
+		if (hasSiblings())
+			refreshSiblings();
 	}
 
 	public function getTitleTabWidth():Float
@@ -76,20 +169,17 @@ class Window extends flixel.system.debug.Window
 			throw "target window to be attached to must not be null";
 
 		var lastSibling = target.getLastRightSibling();
-
-		if (lastSibling == null)
-			// Target has no sibling to the right, so it itself is
-			// the last sibling to the right.
-			lastSibling = target;
-
 		lastSibling._siblingRight = this;
 		this._siblingLeft = lastSibling;
 
-		// Update all windows in the chain
+		// Update position and state of all windows in the chain
 		var head = getLastLeftSibling();
+		head.updateBasedOnSibling(head, true);
+		head.adjustLayout();
+		head.adjustLayoutOfRightSiblings();
 
-		if (head != null)
-			head.updateBasedOnSibling(head, true);
+		// Make this window the active one
+		setFeatured(true);
 	}
 
 	public function detach():Void
@@ -107,7 +197,7 @@ class Window extends flixel.system.debug.Window
 			sibling = sibling._siblingRight;
 		}
 
-		return sibling;
+		return sibling == null ? this : sibling;
 	}
 
 	public function getLastLeftSibling():Window
@@ -120,6 +210,6 @@ class Window extends flixel.system.debug.Window
 			sibling = sibling._siblingLeft;
 		}
 
-		return sibling;
+		return sibling == null ? this : sibling;
 	}
 }
