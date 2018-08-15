@@ -26,9 +26,27 @@ class Entities
 	public function new()
 	{
 		_list = findItems(FlxG.state.members);
+		
+		// Try to apply the names of the properties of the currently active state
+		// to the items that were just collected if they point to the same object.
+		renameItemsUsingMeaningfulNames();
 	}
 
 	public function update():Void {}
+
+	private function renameItemsUsingMeaningfulNames():Void
+	{
+		var meaningfulNames = Type.getInstanceFields(Type.getClass(FlxG.state));
+
+		for (name in meaningfulNames)
+		{
+			var obj:Dynamic = Reflect.field(FlxG.state, name);
+
+			for (entity in _list)
+				if (entity.reference == obj)
+					entity.name = name;
+		}
+	}
 
 	private function findItems(members:Array<FlxBasic>, level:Int = 0, maxLevel:Int = 200):Array<Entity>
 	{
@@ -80,6 +98,7 @@ enum EntityType {
 class Entity
 {
 	public var type:EntityType;
+	public var name:String;	
 	public var children:Array<Entity>;
 	public var level:Int;
 	public var reference:FlxBasic;
@@ -87,6 +106,7 @@ class Entity
 	public function new(type:EntityType, reference:FlxBasic = null, level:Int = -1)
 	{
 		this.type = type;
+		this.name = Std.string(type);
 		this.reference = reference;
 		this.level = level;
 		this.children = [];

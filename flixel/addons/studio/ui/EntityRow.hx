@@ -144,7 +144,7 @@ class EntityRow extends Sprite implements IFlxDestroyable
 	function updateName()
 	{
 		if (entity != null)
-			setNameText(Std.string(entity.type));
+			setNameText(entity.name);
 	}
 	
 	function setNameText(name:String)
