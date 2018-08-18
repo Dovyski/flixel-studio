@@ -71,6 +71,7 @@ class FlxStudio extends flixel.system.debug.Window
 		initUI();		
 
 		FlxG.game.debugger.addWindow(this);
+		setExitHandler(onExit);
 	}
 
 	override public function update():Void
@@ -78,6 +79,25 @@ class FlxStudio extends flixel.system.debug.Window
 		super.update();
 		_properties.update();
 		_entities.update();
+	}
+
+	function onExit():Void
+	{
+		// TODO: save last minute data.
+	}
+
+	// Source: https://stackoverflow.com/a/34305562/29827
+	function setExitHandler(callback:Void->Void):Void {
+		#if openfl_legacy
+		openfl.Lib.current.stage.onQuit = function() {
+			callback();
+			openfl.Lib.close();
+		};
+		#else
+		openfl.Lib.current.stage.application.onExit.add(function(code) {
+			callback();
+		});
+		#end
 	}
 
 	function initUI():Void 
@@ -130,6 +150,10 @@ class FlxStudio extends flixel.system.debug.Window
 		{
 			selectInteractionTool(flixel.addons.studio.tools.tile.Editor);
 			// TODO: select the proper tilemap.
+		}
+		else if (entity.type == EntityType.EMITTER)
+		{
+			_properties.setTarget(cast entity.reference);
 		}
 	}	
 }

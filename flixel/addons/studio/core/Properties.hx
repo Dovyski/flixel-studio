@@ -16,7 +16,7 @@ using flixel.util.FlxArrayUtil;
 class Properties
 {
 	#if FLX_DEBUG
-	var _target:FlxObject;
+	var _target:FlxBasic;
 	var _window:Tracker;
 
 	public function new()
@@ -24,7 +24,7 @@ class Properties
 		_target = null;
 	}
 
-	function setTarget(target:FlxObject):Void
+	public function setTarget(target:FlxBasic):Void
 	{
 		_target = target;
 
@@ -51,18 +51,14 @@ class Properties
 		var selectedItems = FlxG.game.debugger.interaction.selectedItems;
 
 		if(selectedItems.length != 1)
-		{
 			// TODO: show message that multiple elements cannot be tracked?
-			if(_target != null)
-				setTarget(null);
 			return;
-		}
 
 		// TODO: properly get the first selected item
 		var selectedItem = selectedItems.members[0];
 
 		if(_target != selectedItem)
-			setTarget(selectedItem);
+			setTarget(cast selectedItem);
 	}
 	#end
 }
