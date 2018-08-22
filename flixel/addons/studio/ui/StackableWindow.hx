@@ -6,6 +6,8 @@ import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.events.MouseEvent;
 import flash.geom.Rectangle;
+import flash.geom.Point;
+import flixel.math.FlxMath;
 
 /**
  * TODO: add docs
@@ -26,6 +28,7 @@ class StackableWindow extends flixel.system.debug.Window
 	var _scrollMask:Shape;
 	var _scrollHandleY:Sprite;
 	var _scrollableY:Bool;
+	var _usingScrollHandleY:Bool;
 	
 	/**
 	 * Creates a new window object.  This Flash-based class is mainly (only?) used by FlxDebugger.
@@ -44,6 +47,7 @@ class StackableWindow extends flixel.system.debug.Window
 		super(title, icon, width, height, resizable, bounds, closable);
 		visible = true;
 		_featured = true;
+		_usingScrollHandleY = false;
 		
 		_content = new Sprite();
 		_overlays = new Sprite();
@@ -107,10 +111,33 @@ class StackableWindow extends flixel.system.debug.Window
 	override function onMouseMove(?e:MouseEvent):Void
 	{
 		super.onMouseMove(e);
+
+		if (_usingScrollHandleY)
+		{
+			var point = localToGlobal(new Point(_scrollMask.x, _scrollMask.y));
+			_scrollHandleY.y = FlxMath.bound(e.stageY - point.y, 0, _scrollMask.height);
+			var progress = _scrollHandleY.y / (_scrollMask.height - HEADER_HEIGHT);
+
+			setScrollYProgress(progress);
+		}
+	}
+
+	override function onMouseUp(?e:MouseEvent):Void
+	{
+		super.onMouseUp(e);
+		onScrollHandleMouseEvent(null);
 	}
 
 	function onScrollHandleMouseEvent(?e:MouseEvent):Void
 	{
+		if (e != null && e.type == MouseEvent.MOUSE_DOWN)
+			_usingScrollHandleY = true;
+		else
+		{
+			_usingScrollHandleY = false;
+			updatePositionScrollHandleY();
+			ensureScrollBoundaries();			
+		}
 	}
 
 	function onMouseWheel(?e:MouseEvent):Void
@@ -126,24 +153,38 @@ class StackableWindow extends flixel.system.debug.Window
 	{
 		_content.y += scrollSpeed * (up ? 1 : -1);
 
+		updatePositionScrollHandleY();
+		ensureScrollBoundaries();		
+	}
+
+	public function setScrollYProgress(progress:Float):Void
+	{
+		var totalNonVisibleArea = Math.max(_content.height + HEADER_HEIGHT - _scrollMask.height, 0);
+
+		progress = FlxMath.bound(progress, 0, 1);
+		_content.y = - totalNonVisibleArea * progress;
+
+		ensureScrollBoundaries();
+	}
+
+	function ensureScrollBoundaries():Void
+	{
 		if (_content.y > 0)
 			_content.y = HEADER_HEIGHT;
 
 		if (_content.y + _content.height <= _scrollMask.height)
 			_content.y = _scrollMask.height - _content.height;
 
-		updatePositionScrollHandleY();
+		if (_scrollHandleY.y <= 0)
+			_scrollHandleY.y = 0;
+		
+		if (_scrollHandleY.y + _scrollHandleY.height >= _scrollMask.height - _handle.height)
+			_scrollHandleY.y =  _scrollMask.height - _handle.height - _scrollHandleY.height;
 	}
 
 	function updatePositionScrollHandleY():Void
 	{
 		_scrollHandleY.y = calculateScrollingProgress() * _scrollMask.height;
-		
-		if (_scrollHandleY.y <= 0)
-			 _scrollHandleY.y = 0;
-		
-		if (_scrollHandleY.y + _scrollHandleY.height >= _scrollMask.height - _handle.height)
-			_scrollHandleY.y =  _scrollMask.height - _handle.height - _scrollHandleY.height;
 	}
 
 	function calculateScrollingProgress():Float
