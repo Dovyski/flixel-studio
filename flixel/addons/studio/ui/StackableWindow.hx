@@ -1,6 +1,7 @@
 package flixel.addons.studio.ui;
 
 import flash.display.Sprite;
+import flash.display.Shape;
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.events.MouseEvent;
@@ -13,10 +14,16 @@ import flash.geom.Rectangle;
  */
 class StackableWindow extends flixel.system.debug.Window
 {
+	public var scrollSpeed:Float = 15.0;
+	
 	var _siblingLeft:StackableWindow;
 	var _siblingRight:StackableWindow;
 	var _content:Sprite;
+	var _overlays:Sprite;
 	var _featured:Bool;
+	var _scrollMask:Shape;
+	var _scrollHandleY:Sprite;
+	var _scrollableY:Bool;
 	
 	/**
 	 * Creates a new window object.  This Flash-based class is mainly (only?) used by FlxDebugger.
@@ -37,9 +44,35 @@ class StackableWindow extends flixel.system.debug.Window
 		_featured = true;
 		
 		_content = new Sprite();
-		_content.x = 0;
-		_content.y = 0;
+		_overlays = new Sprite();
+		_content.x = _overlays.x = 0;
+		_content.y = _overlays.y = 0;
 		addChild(_content);
+		addChild(_overlays);
+
+		createScrollInfra();
+		setScrollable(true);
+		addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+	}
+
+	function createScrollInfra():Void
+	{
+		_scrollHandleY = new Sprite();
+		_scrollHandleY.x = 0;
+		_scrollHandleY.y = 0;
+		_scrollHandleY.graphics.beginFill(0xFF0000);
+		_scrollHandleY.graphics.drawRect(0, 0, 5, 10);
+		_scrollHandleY.graphics.endFill();
+		_scrollHandleY.addEventListener(MouseEvent.MOUSE_DOWN, onScrollHandleMouseEvent);
+		_overlays.addChild(_scrollHandleY);
+
+		_scrollMask = new Shape();
+		_scrollMask.graphics.beginFill(0xFF0000, 1);
+		_scrollMask.graphics.drawRect(0, 0, 10, 10);
+		_scrollMask.graphics.endFill();
+
+		addChild(_scrollMask);
+		_content.mask = _scrollMask;
 	}
 
 	function setFeatured(status:Bool, force:Bool = false):Void
@@ -56,6 +89,15 @@ class StackableWindow extends flixel.system.debug.Window
 
 		if (_resizable)
 			_handle.visible = status;
+	}
+
+	function onScrollHandleMouseEvent(?e:MouseEvent):Void
+	{
+	}
+
+	function onMouseWheel(?e:MouseEvent):Void
+	{
+		_content.y += scrollSpeed * (e.delta > 0 ? 1 : -1);
 	}
 
 	override function onMouseDown(?e:MouseEvent):Void
@@ -96,6 +138,19 @@ class StackableWindow extends flixel.system.debug.Window
 			next.updateBasedOnSibling(commander, toTheRight, nextOffsetX);
 
 		setFeatured(false);
+	}
+
+	override function updateSize():Void
+	{
+		super.updateSize();
+
+		if (_scrollMask == null)
+			return;
+
+		_scrollMask.width = _width;
+		_scrollMask.height = _height;
+
+		_scrollHandleY.x = _width - _scrollHandleY.width;
 	}
 
 	function adjustLayout():Void
@@ -139,9 +194,13 @@ class StackableWindow extends flixel.system.debug.Window
 		}
 	}
 
-	public function addChildContent(child:DisplayObject):DisplayObject
+	public function addChildContent(child:DisplayObject, alwaysOnTop:Bool = false):DisplayObject
 	{
-		return _content.addChild(child);
+		var container = alwaysOnTop ? _overlays : _content;
+		var element = container.addChild(child);
+		updateSize();
+
+		return element;
 	}
 
 	override public function reposition(x:Float, y:Float):Void
@@ -184,6 +243,11 @@ class StackableWindow extends flixel.system.debug.Window
 	public function detach():Void
 	{
 		// TODO: implement this
+	}
+
+	public function setScrollable(status:Bool):Void
+	{
+		_scrollableY = status;
 	}
 
 	public function getLastRightSibling():StackableWindow
