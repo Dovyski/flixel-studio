@@ -115,6 +115,9 @@ class StackableWindow extends flixel.system.debug.Window
 
 	function onMouseWheel(?e:MouseEvent):Void
 	{
+		if (!needsScrollY())
+			return;
+
 		var isUp = e.delta > 0;
 		scrollY(isUp);
 	}
@@ -127,9 +130,32 @@ class StackableWindow extends flixel.system.debug.Window
 			_content.y = HEADER_HEIGHT;
 
 		if (_content.y + _content.height <= _scrollMask.height)
-			_content.y = - _content.height + _scrollMask.height;
+			_content.y = _scrollMask.height - _content.height;
 
-		// TODO: update handleY position
+		updatePositionScrollHandleY();
+	}
+
+	function updatePositionScrollHandleY():Void
+	{
+		_scrollHandleY.y = calculateScrollingProgress() * _scrollMask.height;
+		
+		if (_scrollHandleY.y <= 0)
+			 _scrollHandleY.y = 0;
+		
+		if (_scrollHandleY.y + _scrollHandleY.height >= _scrollMask.height - _handle.height)
+			_scrollHandleY.y =  _scrollMask.height - _handle.height - _scrollHandleY.height;
+	}
+
+	function calculateScrollingProgress():Float
+	{
+		var totalNonVisibleArea = Math.max(0, _content.height - _scrollMask.height + HEADER_HEIGHT);
+		var currentNonVisibleArea = Math.max(0, (_content.y + _content.height) - _scrollMask.height);
+
+		if (totalNonVisibleArea <= 0)
+			return 0;
+
+		var progress = Math.max(0, 1 - currentNonVisibleArea / totalNonVisibleArea);
+		return progress;
 	}
 
 	override function onMouseDown(?e:MouseEvent):Void
@@ -172,6 +198,11 @@ class StackableWindow extends flixel.system.debug.Window
 		setFeatured(false);
 	}
 
+	function needsScrollY():Bool
+	{
+		return _content.height + HEADER_HEIGHT > _scrollMask.height;
+	}
+
 	override function updateSize():Void
 	{
 		super.updateSize();
@@ -183,7 +214,7 @@ class StackableWindow extends flixel.system.debug.Window
 		_scrollMask.height = _height - HEADER_HEIGHT;
 
 		_scrollHandleY.x = _width - _scrollHandleY.width;
-		_scrollHandleY.visible = _content.height + HEADER_HEIGHT > _scrollMask.height;
+		_scrollHandleY.visible = needsScrollY();
 	}
 
 	function adjustLayout():Void
