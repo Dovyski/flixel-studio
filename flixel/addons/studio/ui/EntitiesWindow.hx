@@ -72,8 +72,8 @@ class EntitiesWindow extends StackableWindow
 		x = 5;
 		y = FlxG.game.height - height;
 
-		createEntitiesContainer();
 		createTopBar();
+		createEntitiesContainer();		
 		createBottomBar();
 	}
 
@@ -108,7 +108,7 @@ class EntitiesWindow extends StackableWindow
 	{
 		_entriesContainer = new Sprite();
 		_entriesContainer.x = 0;
-		_entriesContainer.y = 30;
+		_entriesContainer.y = _topBar.y + _topBar.height;
 		addChildContent(_entriesContainer);
 	}
 
@@ -116,7 +116,7 @@ class EntitiesWindow extends StackableWindow
 	{
 		_topBar = new Sprite();
 		_topBar.x = 0;
-		_topBar.y = 20;
+		_topBar.y = GUTTER;
 
 		_visibilityButton = new FlxSystemButton(new GraphicVisilityIcon(0, 0), function():Void {
 			FlxStudio.instance.entitiesVisibilityButtonClicked.dispatch();
@@ -149,7 +149,7 @@ class EntitiesWindow extends StackableWindow
 		_addButton.alpha = 0.7;
 		
 		_bottomBar.addChild(_addButton);
-		addChildContent(_bottomBar);
+		addChildContent(_bottomBar, true);
 	}
 
 	function addEntry(entity:Entity, updatePosition:Bool = true):Void
