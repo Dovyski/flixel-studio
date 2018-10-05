@@ -50,7 +50,7 @@ class FlxStudio extends flixel.system.debug.Window
 	public var entitiesLockButtonClicked:FlxSignal = new FlxSignal();	
 
 	// TODO: choose a good name for this
-	public static function bootstrap():Void
+	public static function start():Void
 	{
 		FlxStudio.instance = new FlxStudio();
 	}
@@ -61,8 +61,19 @@ class FlxStudio extends flixel.system.debug.Window
 	public function new()
 	{
 		super("FlxStudio");
-
 		visible = false;
+
+		// Initialize everything only after the game has been started, that way
+		// we have access to all element added during the game's `create()` call.
+		// It allows developers to call `FlxStudio.start()` at any point.
+		FlxG.signals.gameStarted.add(bootstrap);
+	}
+
+	/**
+	 * TODO: add docs
+	 */
+	function bootstrap():Void
+	{
 		_properties = new Properties();
 		_entities = new Entities();
 
