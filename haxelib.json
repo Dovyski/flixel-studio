@@ -1,0 +1,10 @@
+{
+	"name": "flixel-studio",
+	"url" : "https://github.com/Dovyski/flixel-studio",
+	"license": "MIT",
+	"tags": ["game", "openfl", "flash", "neko", "cpp", "android", "ios", "cross"],
+	"description": "An embeddable, in-game editor for HaxeFlixel.",
+	"version": "0.0.1-alpha",
+	"releasenote": "Not released yet, so things are wildly crazy and will change.",
+	"contributors": ["Dovyski"]
+}
