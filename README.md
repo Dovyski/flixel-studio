@@ -12,7 +12,7 @@ The philosophy behind Flixel Studio is to empower game developers with tools tha
 
 ## Features
 
-![](https://user-images.githubusercontent.com/512405/42411758-ecede658-8201-11e8-920f-b7805185ab86.gif)
+![flixel-studio](https://user-images.githubusercontent.com/512405/46570435-79ab9280-c964-11e8-8824-9aca88a43786.gif)
 
 * Full-featured in-game editor.
 * Load and modify tilemaps.
