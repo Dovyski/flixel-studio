@@ -26,46 +26,61 @@ using flixel.system.debug.DebuggerUtil;
 
 class ContentLibraryItem extends Sprite implements IFlxDestroyable
 {
-	private static inline var HIGHLIGHT_BG_COLOR:FlxColor = 0x00FF0000;
-	private static inline var HIGHLIGHT_ALPHA:Float = 0.2;
+	private static inline var SELECTED_BG_COLOR:FlxColor = 0x00FF0000;
+	private static inline var SELECTED_ALPHA:Float = 0.2;
 	private static inline var GUTTER = 4;
 	private static inline var TEXT_HEIGHT = 15;
 	private static inline var MAX_NAME_WIDTH = 125;
 	
 	var _icon:Bitmap;
 	var _className:String;
+	var _parentWindow:ContentLibraryWindow;
 	var _nameText:TextField;
-	var _highlightMarker:Sprite;
-	var _highlighted:Bool;
+	var _selectedMarker:Sprite;
+	var _selected:Bool;
 
-	public function new(className:String)
+	public function new(className:String, parentWindow:ContentLibraryWindow)
 	{
 		super();
 		_className = className;
+		_parentWindow = parentWindow;
 
 		buildUI();
-		addEventListener(MouseEvent.CLICK, function(e:Event):Void {
-			e.preventDefault();
-			setHighlighted(!_highlighted);
-		});
+		
+		addEventListener(MouseEvent.MOUSE_DOWN, handleMouseEvent);
+		addEventListener(MouseEvent.MOUSE_UP, handleMouseEvent);
+	}
+
+	function handleMouseEvent(?e:MouseEvent):Void
+	{
+		e.preventDefault();
+
+		if (e.type == MouseEvent.MOUSE_DOWN)
+		{
+			_parentWindow.unselectAllItems();
+			setSelected(true);
+			_parentWindow.startItemDrag(this);
+		}
+		else if (e.type == MouseEvent.MOUSE_UP)
+			_parentWindow.stopItemDrag();
 	}
 	
 	function buildUI():Void
 	{
 		_nameText = initTextField(DebuggerUtil.createTextField());
-		_highlightMarker = createHighlightMarker();
+		_selectedMarker = createSelectedMarker();
 		_icon = createIcon();
 
 		updateName();		
 		updateSize(100, 200);
 	}
 
-	function createHighlightMarker():Sprite
+	function createSelectedMarker():Sprite
 	{
 		var container = new Sprite();
-		var filling = new Bitmap(new BitmapData(50, TEXT_HEIGHT, false, HIGHLIGHT_BG_COLOR));
+		var filling = new Bitmap(new BitmapData(50, TEXT_HEIGHT, false, SELECTED_BG_COLOR));
 		
-		filling.alpha = HIGHLIGHT_ALPHA;
+		filling.alpha = SELECTED_ALPHA;
 		filling.x = 0;
 		filling.y = (TEXT_HEIGHT - filling.height) / 2;
 		container.visible = false;
@@ -102,13 +117,13 @@ class ContentLibraryItem extends Sprite implements IFlxDestroyable
 		return textField;
 	}
 
-	public function setHighlighted(status:Bool):Void
+	public function setSelected(status:Bool):Void
 	{
-		_highlighted = status;
-		_highlightMarker.visible = _highlighted;		
+		_selected = status;
+		_selectedMarker.visible = _selected;		
 
-		if (_highlighted)
-			_highlightMarker.width = width;
+		if (_selected)
+			_selectedMarker.width = width;
 	}
 
 	public function updateSize(nameWidth:Float, windowWidth:Float):Void
@@ -118,7 +133,7 @@ class ContentLibraryItem extends Sprite implements IFlxDestroyable
 		_icon.x = GUTTER;
 		_nameText.x = _icon.x + _icon.width + GUTTER;
 		_nameText.width = nameWidth;
-		_highlightMarker.width = width;
+		_selectedMarker.width = width;
 	}
 	
 	function updateName()
@@ -151,6 +166,6 @@ class ContentLibraryItem extends Sprite implements IFlxDestroyable
 	{
 		_nameText = FlxDestroyUtil.removeChild(this, _nameText);
 		_icon = FlxDestroyUtil.removeChild(this, _icon);
-		_highlightMarker = FlxDestroyUtil.removeChild(this, _highlightMarker);
+		_selectedMarker = FlxDestroyUtil.removeChild(this, _selectedMarker);
 	}
 }

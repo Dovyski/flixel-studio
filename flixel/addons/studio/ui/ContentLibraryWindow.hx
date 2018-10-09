@@ -2,9 +2,11 @@ package flixel.addons.studio.ui;
 
 import flash.display.Sprite;
 import flash.display.BitmapData;
+import flash.events.MouseEvent;
 import flash.geom.Rectangle;
 import flash.text.TextField;
 import flixel.system.ui.FlxSystemButton;
+import flixel.math.FlxPoint;
 import flixel.system.debug.FlxDebugger.GraphicCloseButton;
 import flixel.addons.studio.core.Entities;
 import flixel.addons.studio.core.ContentProvider;
@@ -25,6 +27,8 @@ class ContentLibraryWindow extends StackableWindow
 	var _bottomBar:Sprite;	
 	var _addButton:FlxSystemButton;	
 	var _contentProvider:ContentProvider;
+	var _itemBeingDragged:ContentLibraryItem;
+	var _itemDragStartingPoint:FlxPoint = new FlxPoint();
 	
 	/**
 	 * Creates a new window object.
@@ -45,8 +49,57 @@ class ContentLibraryWindow extends StackableWindow
 		x = 5;
 		y = FlxG.game.height - height;
 
-		createItemsContainer();		
+		createItemsContainer();
 		createBottomBar();
+		stopItemDrag();
+
+		FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, handleMouseUpEvent);
+	}
+
+	function handleItemDraggedIntoScreen(item:ContentLibraryItem):Void
+	{
+		FlxG.log.add("Item DRAGGED into screen");
+	}
+
+	function handleMouseUpEvent(?e:MouseEvent):Void
+	{
+		if (_itemBeingDragged != null && isItemDragDistantEnough())
+		{
+			handleItemDraggedIntoScreen(_itemBeingDragged);
+			stopItemDrag();
+		}
+	}
+
+	function isItemDragDistantEnough():Bool
+	{
+		if (_itemBeingDragged == null)
+			return false;
+
+		var dragDistance = FlxG.mouse.getWorldPosition().distanceTo(_itemDragStartingPoint);
+		return dragDistance >= 10;
+	}
+
+	override public function update():Void
+	{
+		super.update();
+
+		if (_itemBeingDragged != null && isItemDragDistantEnough())`
+		{
+			// TODO: update an UI marker to indicate something is being dragged.
+		}
+	}
+
+	public function startItemDrag(item:ContentLibraryItem):Void
+	{
+		_itemBeingDragged = item;
+		_itemDragStartingPoint.x = FlxG.mouse.x;
+		_itemDragStartingPoint.y = FlxG.mouse.y;
+	}
+
+	public function stopItemDrag():Void
+	{
+		_itemBeingDragged = null;
+		_itemDragStartingPoint.set(0, 0);
 	}
 
 	public function refresh():Void
@@ -55,6 +108,15 @@ class ContentLibraryWindow extends StackableWindow
 		for (className in _contentProvider.findAll())
 			addItem(className, false);
 		updateItemsPosition();
+	}
+
+	public function unselectAllItems():Void
+	{
+		for (i in 0..._itemsContainer.numChildren)
+		{
+			var item:ContentLibraryItem = cast _itemsContainer.getChildAt(i);
+			item.setSelected(false);
+		}
 	}
 
 	override public function resize(width:Float, height:Float):Void
@@ -89,7 +151,7 @@ class ContentLibraryWindow extends StackableWindow
 
 	function addItem(itemClassName:String, updatePosition:Bool = true):Void
 	{
-		var item = new ContentLibraryItem(itemClassName);
+		var item = new ContentLibraryItem(itemClassName, this);
 		_itemsContainer.addChild(item);
 
 		if (updatePosition)
