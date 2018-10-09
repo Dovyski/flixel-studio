@@ -49,7 +49,8 @@ class FlxStudio extends flixel.system.debug.Window
 	public var entityLockButtonClicked:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
 	public var entitiesAddButtonClicked:FlxSignal = new FlxSignal();
 	public var entitiesVisibilityButtonClicked:FlxSignal = new FlxSignal();
-	public var entitiesLockButtonClicked:FlxSignal = new FlxSignal();	
+	public var entitiesLockButtonClicked:FlxSignal = new FlxSignal();
+	public var contentLibraryItemDraggedIntoScreen:FlxTypedSignal<ContentLibraryItem->Void> = new FlxTypedSignal();	
 
 	// TODO: choose a good name for this
 	public static function start():Void
@@ -140,7 +141,13 @@ class FlxStudio extends flixel.system.debug.Window
 	function initSignals():Void
 	{
 		entityRowSelected.add(onEntityRowSelected);
+		contentLibraryItemDraggedIntoScreen.add(onContentLibraryItemDraggedIntoScreen);
 	}
+
+	function onContentLibraryItemDraggedIntoScreen(item:ContentLibraryItem):Void
+	{
+		// TODO: add item to the screen using Flixel's console.
+	}	
 
 	function selectInteractionTool(className:Class<Tool>):Void
 	{

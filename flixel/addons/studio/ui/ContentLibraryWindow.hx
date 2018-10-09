@@ -1,6 +1,7 @@
 package flixel.addons.studio.ui;
 
 import flash.display.Sprite;
+import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.events.MouseEvent;
 import flash.geom.Rectangle;
@@ -29,6 +30,7 @@ class ContentLibraryWindow extends StackableWindow
 	var _contentProvider:ContentProvider;
 	var _itemBeingDragged:ContentLibraryItem;
 	var _itemDragStartingPoint:FlxPoint = new FlxPoint();
+	var _itemDragMarker:Sprite;	
 	
 	/**
 	 * Creates a new window object.
@@ -49,6 +51,7 @@ class ContentLibraryWindow extends StackableWindow
 		x = 5;
 		y = FlxG.game.height - height;
 
+		_itemDragMarker = createItemDragMarker();
 		createItemsContainer();
 		createBottomBar();
 		stopItemDrag();
@@ -56,9 +59,26 @@ class ContentLibraryWindow extends StackableWindow
 		FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, handleMouseUpEvent);
 	}
 
+	function createItemDragMarker():Sprite
+	{
+		var marker = new Sprite();
+		var filling = new Bitmap(new BitmapData(80, 20, false, 0x00FF0000));
+		
+		filling.alpha = 0.5;
+		filling.x = 0;
+		filling.y = 0;
+		marker.visible = false;
+		marker.mouseEnabled = false;
+		
+		marker.addChild(filling);
+		FlxG.stage.addChild(marker); // TODO: improve where the marker is attached?
+		
+		return marker;
+	}	
+
 	function handleItemDraggedIntoScreen(item:ContentLibraryItem):Void
 	{
-		FlxG.log.add("Item DRAGGED into screen");
+		FlxStudio.instance.contentLibraryItemDraggedIntoScreen.dispatch(item);
 	}
 
 	function handleMouseUpEvent(?e:MouseEvent):Void
@@ -75,7 +95,7 @@ class ContentLibraryWindow extends StackableWindow
 		if (_itemBeingDragged == null)
 			return false;
 
-		var dragDistance = FlxG.mouse.getWorldPosition().distanceTo(_itemDragStartingPoint);
+		var dragDistance = FlxG.mouse.getScreenPosition().distanceTo(_itemDragStartingPoint);
 		return dragDistance >= 10;
 	}
 
@@ -83,23 +103,28 @@ class ContentLibraryWindow extends StackableWindow
 	{
 		super.update();
 
-		if (_itemBeingDragged != null && isItemDragDistantEnough())`
+		if (_itemBeingDragged != null && isItemDragDistantEnough())
 		{
-			// TODO: update an UI marker to indicate something is being dragged.
+			_itemDragMarker.visible = true;
+			_itemDragMarker.x = FlxG.mouse.screenX * FlxG.scaleMode.scale.x;
+			_itemDragMarker.y = FlxG.mouse.screenY * FlxG.scaleMode.scale.y;
 		}
+		else
+			_itemDragMarker.visible = false;
 	}
 
 	public function startItemDrag(item:ContentLibraryItem):Void
 	{
 		_itemBeingDragged = item;
-		_itemDragStartingPoint.x = FlxG.mouse.x;
-		_itemDragStartingPoint.y = FlxG.mouse.y;
+		_itemDragStartingPoint.x = FlxG.mouse.screenX;
+		_itemDragStartingPoint.y = FlxG.mouse.screenY;
 	}
 
 	public function stopItemDrag():Void
 	{
 		_itemBeingDragged = null;
 		_itemDragStartingPoint.set(0, 0);
+		_itemDragMarker.visible = false;
 	}
 
 	public function refresh():Void
