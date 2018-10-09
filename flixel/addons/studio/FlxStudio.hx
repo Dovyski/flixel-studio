@@ -40,7 +40,9 @@ class FlxStudio extends flixel.system.debug.Window
 
 	var _properties:Properties;
 	var _entities:Entities;
+	var _contentProvider:ContentProvider;
 	var _entitiesWindow:EntitiesWindow;	
+	var _contentLibraryWindow:ContentLibraryWindow;	
 
 	public var entityRowSelected:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
 	public var entityVisibilityButtonClicked:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
@@ -76,6 +78,7 @@ class FlxStudio extends flixel.system.debug.Window
 	{
 		_properties = new Properties();
 		_entities = new Entities();
+		_contentProvider = new ContentProvider();
 
 		addInteractionTools();
 		initSignals();
@@ -114,9 +117,13 @@ class FlxStudio extends flixel.system.debug.Window
 	function initUI():Void 
 	{
 		_entitiesWindow = new EntitiesWindow(_entities);
+		_contentLibraryWindow = new ContentLibraryWindow(_contentProvider);
+
 		_entitiesWindow.refresh();
+		_contentLibraryWindow.refresh();
 		
 		FlxG.game.debugger.addWindow(_entitiesWindow);	
+		FlxG.game.debugger.addWindow(_contentLibraryWindow);	
 	}
 
 	/**
