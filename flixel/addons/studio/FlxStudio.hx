@@ -146,7 +146,18 @@ class FlxStudio extends flixel.system.debug.Window
 
 	function onContentLibraryItemDraggedIntoScreen(item:ContentLibraryItem):Void
 	{
-		// TODO: add item to the screen using Flixel's console.
+		var params = [];
+		var classDefinition = Type.resolveClass(item.className);
+		var obj:FlxObject = Type.createInstance(classDefinition, params);
+		
+		if (obj == null)
+			return;
+		
+		obj.x = FlxG.mouse.x;
+		obj.y = FlxG.mouse.y;
+		
+		// TODO: add obj to the right layer
+		FlxG.state.add(obj);
 	}	
 
 	function selectInteractionTool(className:Class<Tool>):Void

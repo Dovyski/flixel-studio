@@ -32,8 +32,9 @@ class ContentLibraryItem extends Sprite implements IFlxDestroyable
 	private static inline var TEXT_HEIGHT = 15;
 	private static inline var MAX_NAME_WIDTH = 125;
 	
+	public var className(default, null):String;
+	
 	var _icon:Bitmap;
-	var _className:String;
 	var _parentWindow:ContentLibraryWindow;
 	var _nameText:TextField;
 	var _selectedMarker:Sprite;
@@ -42,7 +43,7 @@ class ContentLibraryItem extends Sprite implements IFlxDestroyable
 	public function new(className:String, parentWindow:ContentLibraryWindow)
 	{
 		super();
-		_className = className;
+		this.className = className;
 		_parentWindow = parentWindow;
 
 		buildUI();
@@ -138,7 +139,7 @@ class ContentLibraryItem extends Sprite implements IFlxDestroyable
 	
 	function updateName()
 	{
-		setNameText(_className);
+		setNameText(this.className);
 	}
 	
 	function setNameText(name:String)

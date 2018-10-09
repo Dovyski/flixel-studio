@@ -26,7 +26,7 @@ class ContentProvider
 	public function new()
 	{
 		// TODO: properly get class names for content
-		_list = ["FlxSprite", "FlxPoint"];
+		_list = ["flixel.FlxSprite", "flixel.math.FlxPoint"];
 	}
 
 	public function findAll():Array<String>
