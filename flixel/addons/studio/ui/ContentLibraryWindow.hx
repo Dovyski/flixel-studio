@@ -21,7 +21,6 @@ using flixel.system.debug.DebuggerUtil;
  */
 class ContentLibraryWindow extends StackableWindow
 {
-	private static inline var LINE_HEIGHT:Int = 15;
 	private static inline var GUTTER = 4;
 
 	var _itemsContainer:Sprite;
@@ -197,8 +196,8 @@ class ContentLibraryWindow extends StackableWindow
 		for (i in 0..._itemsContainer.numChildren)
 		{
 			var item:ContentLibraryItem = cast _itemsContainer.getChildAt(i);
-			item.y = i * LINE_HEIGHT;
-			item.updateSize(100, _width);
+			item.y = i * item.height;
+			item.updateSize(_width);
 		}
 	}
 }

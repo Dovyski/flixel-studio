@@ -24,19 +24,22 @@ import flixel.addons.studio.ui.EntitiesWindow.GraphicSpriteIcon;
 using flixel.util.FlxStringUtil;
 using flixel.system.debug.DebuggerUtil;
 
+@:bitmap("assets/images/icons/library-item.png") 
+class GraphicLibraryItemDefault extends BitmapData {}
+
 class ContentLibraryItem extends Sprite implements IFlxDestroyable
 {
 	private static inline var SELECTED_BG_COLOR:FlxColor = 0x00FF0000;
 	private static inline var SELECTED_ALPHA:Float = 0.2;
 	private static inline var GUTTER = 4;
 	private static inline var TEXT_HEIGHT = 15;
-	private static inline var MAX_NAME_WIDTH = 125;
 	
 	public var className(default, null):String;
 	
 	var _icon:Bitmap;
 	var _parentWindow:ContentLibraryWindow;
 	var _nameText:TextField;
+	var _labelText:TextField;
 	var _selectedMarker:Sprite;
 	var _selected:Bool;
 
@@ -69,11 +72,12 @@ class ContentLibraryItem extends Sprite implements IFlxDestroyable
 	function buildUI():Void
 	{
 		_nameText = initTextField(DebuggerUtil.createTextField());
+		_labelText = initTextField(DebuggerUtil.createTextField(), 10, 0xAFAFAF);
 		_selectedMarker = createSelectedMarker();
 		_icon = createIcon();
 
-		updateName();		
-		updateSize(100, 200);
+		updateName();
+		positionInnerElements();
 	}
 
 	function createSelectedMarker():Sprite
@@ -95,19 +99,20 @@ class ContentLibraryItem extends Sprite implements IFlxDestroyable
 
 	function createIcon():Bitmap
 	{
-		var data:BitmapData = new GraphicSpriteIcon(0, 0);
+		var data:BitmapData = new GraphicLibraryItemDefault(0, 0);
 		var icon:Bitmap = new Bitmap(data);		
 
-		icon.y = (TEXT_HEIGHT - icon.height) / 2;
+		icon.x = 0;
+		icon.y = 0;
 		addChild(icon);
 
 		return icon;
 	}
 
-	function initTextField<T:TextField>(textField:T, upHandler:Event->Void = null):T
+	function initTextField<T:TextField>(textField:T, fontSize:Int = 12, fontColor:Int = 0xFFFFFF, upHandler:Event->Void = null):T
 	{
 		textField.selectable = false;
-		textField.defaultTextFormat = new TextFormat(FlxAssets.FONT_DEBUGGER, 12, 0xFFFFFF);
+		textField.defaultTextFormat = new TextFormat(FlxAssets.FONT_DEBUGGER, fontSize, 0xFFFFFF);
 		textField.autoSize = TextFieldAutoSize.NONE;
 		textField.height = TEXT_HEIGHT;
 		addChild(textField);
@@ -124,48 +129,56 @@ class ContentLibraryItem extends Sprite implements IFlxDestroyable
 		_selectedMarker.visible = _selected;		
 
 		if (_selected)
+		{
 			_selectedMarker.width = width;
+			_selectedMarker.height = height;
+		}
 	}
 
-	public function updateSize(nameWidth:Float, windowWidth:Float):Void
+	function positionInnerElements():Void
 	{
-		var textWidth = windowWidth - _icon.width - GUTTER * 2;
-
 		_icon.x = GUTTER;
+		_icon.y = GUTTER;
 		_nameText.x = _icon.x + _icon.width + GUTTER;
-		_nameText.width = nameWidth;
-		_selectedMarker.width = width;
+		_nameText.y = _icon.y;
+		_labelText.x = _nameText.x;
+		_labelText.y = _nameText.height + GUTTER / 2;
+		_selectedMarker.y = _icon.y - GUTTER / 2;
 	}
-	
+
+	public function updateSize(windowWidth:Float):Void
+	{
+		_selectedMarker.width = windowWidth;
+	}	
+
 	function updateName()
 	{
-		setNameText(this.className);
-	}
-	
-	function setNameText(name:String)
-	{
-		if (name == null)
+		if (this.className == null)
+		{
+			// This seems like a mistake. Someone provided this item with an invalid
+			// class. Let's show some meaningful warning about it.
+			_nameText.text = "[null]";
+			_labelText.text = "Invalid class name";
 			return;
+		}
+
+		var label = this.className;
+		var cutIndex = label.lastIndexOf('.');
+		var name = cutIndex == -1 ? label : label.substr(cutIndex + 1);
 
 		_nameText.text = name;
-		var currentWidth = _nameText.textWidth + 4;
-		_nameText.width = Math.min(currentWidth, MAX_NAME_WIDTH);
-	}
-	
-	public function getNameWidth():Float
-	{
-		return _nameText.width;
+		_labelText.text = label;
 	}
 	
 	public function getMinWidth():Float
 	{
-		// TODO: check this
-		return _nameText.textWidth + GUTTER * 2;
+		return Math.max(_nameText.textWidth, _labelText.textWidth) + GUTTER * 2;
 	}
 	
 	public function destroy()
 	{
 		_nameText = FlxDestroyUtil.removeChild(this, _nameText);
+		_labelText = FlxDestroyUtil.removeChild(this, _labelText);
 		_icon = FlxDestroyUtil.removeChild(this, _icon);
 		_selectedMarker = FlxDestroyUtil.removeChild(this, _selectedMarker);
 	}
