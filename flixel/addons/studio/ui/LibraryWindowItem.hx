@@ -27,7 +27,7 @@ using flixel.system.debug.DebuggerUtil;
 @:bitmap("assets/images/icons/library-item.png") 
 class GraphicLibraryItemDefault extends BitmapData {}
 
-class ContentLibraryItem extends Sprite implements IFlxDestroyable
+class LibraryWindowItem extends Sprite implements IFlxDestroyable
 {
 	private static inline var SELECTED_BG_COLOR:FlxColor = 0x00FF0000;
 	private static inline var SELECTED_ALPHA:Float = 0.2;
@@ -37,13 +37,13 @@ class ContentLibraryItem extends Sprite implements IFlxDestroyable
 	public var className(default, null):String;
 	
 	var _icon:Bitmap;
-	var _parentWindow:ContentLibraryWindow;
+	var _parentWindow:LibraryWindow;
 	var _nameText:TextField;
 	var _labelText:TextField;
 	var _selectedMarker:Sprite;
 	var _selected:Bool;
 
-	public function new(className:String, parentWindow:ContentLibraryWindow)
+	public function new(className:String, parentWindow:LibraryWindow)
 	{
 		super();
 		this.className = className;

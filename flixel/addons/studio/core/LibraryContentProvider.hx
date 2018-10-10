@@ -18,7 +18,7 @@ using flixel.util.FlxArrayUtil;
  * TODO: add docs
  * @author Fernando Bevilacqua <dovyski@gmail.com>
  */
-class ContentProvider
+class LibraryContentProvider
 {
 	var _list:Array<String>;
 	

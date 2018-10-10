@@ -40,9 +40,9 @@ class FlxStudio extends flixel.system.debug.Window
 
 	var _properties:Properties;
 	var _entities:Entities;
-	var _contentProvider:ContentProvider;
+	var _library:LibraryContentProvider;
 	var _entitiesWindow:EntitiesWindow;	
-	var _contentLibraryWindow:ContentLibraryWindow;	
+	var _libraryWindow:LibraryWindow;	
 
 	public var entityRowSelected:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
 	public var entityVisibilityButtonClicked:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
@@ -50,7 +50,7 @@ class FlxStudio extends flixel.system.debug.Window
 	public var entitiesAddButtonClicked:FlxSignal = new FlxSignal();
 	public var entitiesVisibilityButtonClicked:FlxSignal = new FlxSignal();
 	public var entitiesLockButtonClicked:FlxSignal = new FlxSignal();
-	public var contentLibraryItemDraggedIntoScreen:FlxTypedSignal<ContentLibraryItem->Void> = new FlxTypedSignal();	
+	public var libraryItemDraggedIntoScreen:FlxTypedSignal<LibraryWindowItem->Void> = new FlxTypedSignal();	
 
 	// TODO: choose a good name for this
 	public static function start():Void
@@ -79,7 +79,7 @@ class FlxStudio extends flixel.system.debug.Window
 	{
 		_properties = new Properties();
 		_entities = new Entities();
-		_contentProvider = new ContentProvider();
+		_library = new LibraryContentProvider();
 
 		addInteractionTools();
 		initSignals();
@@ -118,13 +118,13 @@ class FlxStudio extends flixel.system.debug.Window
 	function initUI():Void 
 	{
 		_entitiesWindow = new EntitiesWindow(_entities);
-		_contentLibraryWindow = new ContentLibraryWindow(_contentProvider);
+		_libraryWindow = new LibraryWindow(_library);
 
 		_entitiesWindow.refresh();
-		_contentLibraryWindow.refresh();
+		_libraryWindow.refresh();
 		
 		FlxG.game.debugger.addWindow(_entitiesWindow);	
-		FlxG.game.debugger.addWindow(_contentLibraryWindow);	
+		FlxG.game.debugger.addWindow(_libraryWindow);	
 	}
 
 	/**
@@ -141,10 +141,10 @@ class FlxStudio extends flixel.system.debug.Window
 	function initSignals():Void
 	{
 		entityRowSelected.add(onEntityRowSelected);
-		contentLibraryItemDraggedIntoScreen.add(onContentLibraryItemDraggedIntoScreen);
+		libraryItemDraggedIntoScreen.add(onLibraryItemDraggedIntoScreen);
 	}
 
-	function onContentLibraryItemDraggedIntoScreen(item:ContentLibraryItem):Void
+	function onLibraryItemDraggedIntoScreen(item:LibraryWindowItem):Void
 	{
 		var params = [];
 		var classDefinition = Type.resolveClass(item.className);
