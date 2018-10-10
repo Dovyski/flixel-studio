@@ -1,35 +1,32 @@
 package flixel.addons.studio.core;
 
-import openfl.display.Sprite;
-import openfl.events.Event;
-import flixel.FlxG;
-import flixel.FlxObject;
-import flixel.tile.FlxTilemap;
-import flixel.effects.particles.FlxEmitter;
-import flixel.group.FlxGroup;
-import flixel.math.FlxPoint;
-import flixel.system.debug.watch.Tracker;
-import flixel.addons.studio.ui.EntitiesWindow;
-
-using flixel.util.FlxStringUtil;
-using flixel.util.FlxArrayUtil;
+import flixel.FlxSprite;
 
 /**
- * TODO: add docs
+ * Manages all content that can be added into the game by dragging
+ * and dropping items from the library window.
+ *
  * @author Fernando Bevilacqua <dovyski@gmail.com>
  */
 class Library
 {
-	var _list:Array<String>;
+	var _list:Array<LibraryItem>;
 	
 	#if FLX_DEBUG
 	public function new()
 	{
-		// TODO: properly get class names for content
-		_list = ["flixel.FlxSprite", "flixel.math.FlxPoint"];
+		_list = [];
+
+		// Add some default elements
+		add(new LibraryItem("flixel.FlxSprite"));
 	}
 
-	public function findAll():Array<String>
+	public function add(item:LibraryItem):Void
+	{
+		_list.push(item);
+	}
+
+	public function findAll():Array<LibraryItem>
 	{
 		return _list;
 	}

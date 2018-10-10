@@ -19,13 +19,11 @@ import flixel.util.FlxDestroyUtil;
 import flixel.util.FlxDestroyUtil.IFlxDestroyable;
 import flixel.addons.studio.core.Entities;
 import flixel.addons.studio.core.Entities.EntityType;
+import flixel.addons.studio.core.LibraryItem;
 import flixel.addons.studio.ui.EntitiesWindow.GraphicSpriteIcon;
 
 using flixel.util.FlxStringUtil;
 using flixel.system.debug.DebuggerUtil;
-
-@:bitmap("assets/images/icons/library-item.png") 
-class GraphicLibraryItemDefault extends BitmapData {}
 
 class LibraryWindowRow extends Sprite implements IFlxDestroyable
 {
@@ -34,7 +32,7 @@ class LibraryWindowRow extends Sprite implements IFlxDestroyable
 	private static inline var GUTTER = 4;
 	private static inline var TEXT_HEIGHT = 15;
 	
-	public var className(default, null):String;
+	public var item(default, null):LibraryItem;
 	
 	var _icon:Bitmap;
 	var _parentWindow:LibraryWindow;
@@ -43,10 +41,14 @@ class LibraryWindowRow extends Sprite implements IFlxDestroyable
 	var _selectedMarker:Sprite;
 	var _selected:Bool;
 
-	public function new(className:String, parentWindow:LibraryWindow)
+	public function new(item:LibraryItem, parentWindow:LibraryWindow)
 	{
 		super();
-		this.className = className;
+
+		if (item == null)
+			throw "Library item cannot be null.";
+
+		this.item = item;
 		_parentWindow = parentWindow;
 
 		buildUI();
@@ -99,8 +101,7 @@ class LibraryWindowRow extends Sprite implements IFlxDestroyable
 
 	function createIcon():Bitmap
 	{
-		var data:BitmapData = new GraphicLibraryItemDefault(0, 0);
-		var icon:Bitmap = new Bitmap(data);		
+		var icon:Bitmap = new Bitmap(item.icon.bitmapData);
 
 		icon.x = 0;
 		icon.y = 0;
@@ -153,7 +154,7 @@ class LibraryWindowRow extends Sprite implements IFlxDestroyable
 
 	function updateName()
 	{
-		if (this.className == null)
+		if (this.item.className == null)
 		{
 			// This seems like a mistake. Someone provided this item with an invalid
 			// class. Let's show some meaningful warning about it.
@@ -162,9 +163,14 @@ class LibraryWindowRow extends Sprite implements IFlxDestroyable
 			return;
 		}
 
-		var label = this.className;
-		var cutIndex = label.lastIndexOf('.');
-		var name = cutIndex == -1 ? label : label.substr(cutIndex + 1);
+		var label = this.item.className;
+		var name = this.item.name;
+		
+		if (name == "")
+		{
+			var cutIndex = label.lastIndexOf('.');
+			name = cutIndex == -1 ? label : label.substr(cutIndex + 1);
+		}
 
 		_nameText.text = name;
 		_labelText.text = label;
@@ -181,5 +187,6 @@ class LibraryWindowRow extends Sprite implements IFlxDestroyable
 		_labelText = FlxDestroyUtil.removeChild(this, _labelText);
 		_icon = FlxDestroyUtil.removeChild(this, _icon);
 		_selectedMarker = FlxDestroyUtil.removeChild(this, _selectedMarker);
+		this.item = null;
 	}
 }

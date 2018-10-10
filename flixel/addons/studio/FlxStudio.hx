@@ -50,7 +50,7 @@ class FlxStudio extends flixel.system.debug.Window
 	public var entitiesAddButtonClicked:FlxSignal = new FlxSignal();
 	public var entitiesVisibilityButtonClicked:FlxSignal = new FlxSignal();
 	public var entitiesLockButtonClicked:FlxSignal = new FlxSignal();
-	public var libraryItemDraggedIntoScreen:FlxTypedSignal<LibraryWindowRow->Void> = new FlxTypedSignal();	
+	public var libraryItemDraggedIntoScreen:FlxTypedSignal<LibraryItem->Void> = new FlxTypedSignal();
 
 	// TODO: choose a good name for this
 	public static function start():Void
@@ -144,11 +144,10 @@ class FlxStudio extends flixel.system.debug.Window
 		libraryItemDraggedIntoScreen.add(onLibraryItemDraggedIntoScreen);
 	}
 
-	function onLibraryItemDraggedIntoScreen(item:LibraryWindowRow):Void
+	function onLibraryItemDraggedIntoScreen(item:LibraryItem):Void
 	{
-		var params = [];
 		var classDefinition = Type.resolveClass(item.className);
-		var obj:FlxObject = Type.createInstance(classDefinition, params);
+		var obj:FlxObject = Type.createInstance(classDefinition, item.params);
 		
 		if (obj == null)
 			return;
