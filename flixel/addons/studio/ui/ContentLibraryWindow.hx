@@ -61,9 +61,9 @@ class ContentLibraryWindow extends StackableWindow
 	function createItemDragMarker():Sprite
 	{
 		var marker = new Sprite();
-		var filling = new Bitmap(new BitmapData(80, 20, false, 0x00FF0000));
+		var filling = new Bitmap(new BitmapData(42, 42, false, 0x00FF0000));
 		
-		filling.alpha = 0.5;
+		filling.alpha = 0.4;
 		filling.x = 0;
 		filling.y = 0;
 		marker.visible = false;
