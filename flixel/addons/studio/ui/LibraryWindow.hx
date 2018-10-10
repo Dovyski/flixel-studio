@@ -10,7 +10,7 @@ import flixel.system.ui.FlxSystemButton;
 import flixel.math.FlxPoint;
 import flixel.system.debug.FlxDebugger.GraphicCloseButton;
 import flixel.addons.studio.core.Entities;
-import flixel.addons.studio.core.LibraryContentProvider;
+import flixel.addons.studio.core.Library;
 
 using flixel.system.debug.DebuggerUtil;
 
@@ -26,8 +26,8 @@ class LibraryWindow extends StackableWindow
 	var _itemsContainer:Sprite;
 	var _bottomBar:Sprite;	
 	var _addButton:FlxSystemButton;	
-	var _contentProvider:LibraryContentProvider;
-	var _itemBeingDragged:LibraryWindowItem;
+	var _contentProvider:Library;
+	var _itemBeingDragged:LibraryWindowRow;
 	var _itemDragStartingPoint:FlxPoint = new FlxPoint();
 	var _itemDragMarker:Sprite;	
 	
@@ -42,7 +42,7 @@ class LibraryWindow extends StackableWindow
 	 * @param   Bounds      A rectangle indicating the valid screen area for the window.
 	 * @param   Closable    Whether this window has a close button that removes the window.
 	 */
-	public function new(contentProvider:LibraryContentProvider)
+	public function new(contentProvider:Library)
 	{
 		super("Library", null, 200, 200, true);
 		_contentProvider = contentProvider;
@@ -75,7 +75,7 @@ class LibraryWindow extends StackableWindow
 		return marker;
 	}	
 
-	function handleItemDraggedIntoScreen(item:LibraryWindowItem):Void
+	function handleItemDraggedIntoScreen(item:LibraryWindowRow):Void
 	{
 		FlxStudio.instance.libraryItemDraggedIntoScreen.dispatch(item);
 	}
@@ -112,7 +112,7 @@ class LibraryWindow extends StackableWindow
 			_itemDragMarker.visible = false;
 	}
 
-	public function startItemDrag(item:LibraryWindowItem):Void
+	public function startItemDrag(item:LibraryWindowRow):Void
 	{
 		_itemBeingDragged = item;
 		_itemDragStartingPoint.x = FlxG.mouse.screenX;
@@ -138,7 +138,7 @@ class LibraryWindow extends StackableWindow
 	{
 		for (i in 0..._itemsContainer.numChildren)
 		{
-			var item:LibraryWindowItem = cast _itemsContainer.getChildAt(i);
+			var item:LibraryWindowRow = cast _itemsContainer.getChildAt(i);
 			item.setSelected(false);
 		}
 	}
@@ -175,7 +175,7 @@ class LibraryWindow extends StackableWindow
 
 	function addItem(itemClassName:String, updatePosition:Bool = true):Void
 	{
-		var item = new LibraryWindowItem(itemClassName, this);
+		var item = new LibraryWindowRow(itemClassName, this);
 		_itemsContainer.addChild(item);
 
 		if (updatePosition)
@@ -186,7 +186,7 @@ class LibraryWindow extends StackableWindow
 	{
 		while (_itemsContainer.numChildren > 0)
 		{
-			var item:LibraryWindowItem = cast _itemsContainer.getChildAt(0);
+			var item:LibraryWindowRow = cast _itemsContainer.getChildAt(0);
 			item.destroy();
 		}
 	}
@@ -195,7 +195,7 @@ class LibraryWindow extends StackableWindow
 	{
 		for (i in 0..._itemsContainer.numChildren)
 		{
-			var item:LibraryWindowItem = cast _itemsContainer.getChildAt(i);
+			var item:LibraryWindowRow = cast _itemsContainer.getChildAt(i);
 			item.y = i * item.height;
 			item.updateSize(_width);
 		}

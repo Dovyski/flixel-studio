@@ -27,7 +27,7 @@ using flixel.system.debug.DebuggerUtil;
 @:bitmap("assets/images/icons/library-item.png") 
 class GraphicLibraryItemDefault extends BitmapData {}
 
-class LibraryWindowItem extends Sprite implements IFlxDestroyable
+class LibraryWindowRow extends Sprite implements IFlxDestroyable
 {
 	private static inline var SELECTED_BG_COLOR:FlxColor = 0x00FF0000;
 	private static inline var SELECTED_ALPHA:Float = 0.2;
