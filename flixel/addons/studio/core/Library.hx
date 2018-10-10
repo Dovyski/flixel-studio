@@ -19,6 +19,7 @@ class Library
 
 		// Add some default elements
 		add(new LibraryItem("flixel.FlxSprite"));
+		add(new LibraryItem("flixel.text.FlxText"));
 	}
 
 	public function add(item:LibraryItem):Void

@@ -74,7 +74,7 @@ class LibraryWindowRow extends Sprite implements IFlxDestroyable
 	function buildUI():Void
 	{
 		_nameText = initTextField(DebuggerUtil.createTextField());
-		_labelText = initTextField(DebuggerUtil.createTextField(), 10, 0xAFAFAF);
+		_labelText = initTextField(DebuggerUtil.createTextField(), 10, 0xBABABA);
 		_selectedMarker = createSelectedMarker();
 		_icon = createIcon();
 
@@ -113,7 +113,7 @@ class LibraryWindowRow extends Sprite implements IFlxDestroyable
 	function initTextField<T:TextField>(textField:T, fontSize:Int = 12, fontColor:Int = 0xFFFFFF, upHandler:Event->Void = null):T
 	{
 		textField.selectable = false;
-		textField.defaultTextFormat = new TextFormat(FlxAssets.FONT_DEBUGGER, fontSize, 0xFFFFFF);
+		textField.defaultTextFormat = new TextFormat(FlxAssets.FONT_DEBUGGER, fontSize, fontColor);
 		textField.autoSize = TextFieldAutoSize.NONE;
 		textField.height = TEXT_HEIGHT;
 		addChild(textField);
