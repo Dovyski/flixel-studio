@@ -23,10 +23,11 @@ class Hand extends Tool
 {		
 	static inline var CURSOR_DRAGGING = "handClosed";
 	
-	public static inline var KEYBOARD_MOVE_SPEED:Float = 3;
+	public static inline var KEYBOARD_MOVE_SPEED:Float = 1;
+	public static inline var KEYBOARD_MOVE_SPEED_BOOSTED:Float = 5;
 	public static inline var DRAG_SMOOTH_FACTOR:Float = 0.7;
-	public static inline var DRAG_MAX_MOVEMENT:Float = 5;
-	public static inline var DRAG_DEAD_ZONE_DISTANCE:Float = 10;
+	public static inline var DRAG_MAX_MOVEMENT:Float = 15;
+	public static inline var DRAG_DEAD_ZONE_DISTANCE:Float = 2;
 	
 	var _dragStartPoint:FlxPoint = new FlxPoint();
 	var _dragEndPoint:FlxPoint = new FlxPoint();
@@ -71,20 +72,21 @@ class Hand extends Tool
 
 	function updateKeyboardBasedMove():Void
 	{
+		var speed:Float = _brain.keyPressed(Keyboard.SHIFT) ? KEYBOARD_MOVE_SPEED_BOOSTED : KEYBOARD_MOVE_SPEED;
 		var deltaX:Float = 0;
 		var deltaY:Float = 0;
 
 		if (_brain.keyPressed(Keyboard.UP))
-			deltaY = -KEYBOARD_MOVE_SPEED;
+			deltaY = -speed;
 
 		if (_brain.keyPressed(Keyboard.DOWN))
-			deltaY = KEYBOARD_MOVE_SPEED;
+			deltaY = speed;
 
 		if (_brain.keyPressed(Keyboard.LEFT))
-			deltaX = -KEYBOARD_MOVE_SPEED;
+			deltaX = -speed;
 
 		if (_brain.keyPressed(Keyboard.RIGHT))
-			deltaX = KEYBOARD_MOVE_SPEED;
+			deltaX = speed;
 
 		FlxG.camera.scroll.x += deltaX;
 		FlxG.camera.scroll.y += deltaY;
@@ -92,22 +94,23 @@ class Hand extends Tool
 
 	function updateOngoinDragAction():Void
 	{
-		_dragEndPoint.set(_brain.flixelPointer.x, _brain.flixelPointer.y);
+		// If the mouse cursor is not moving on the screen, we interrupt the calculation
+		// to prevent the camera from "sliding" endlessly.
+		if (_dragEndPoint.distanceTo(_brain.flixelPointer) <= DRAG_DEAD_ZONE_DISTANCE)
+			return;
 
-		setCursorInUse(CURSOR_DRAGGING);
+		_dragEndPoint.set(_brain.flixelPointer.x, _brain.flixelPointer.y);
 
 		var deltaX:Float = _dragEndPoint.x - _dragStartPoint.x;
 		var deltaY:Float = _dragEndPoint.y - _dragStartPoint.y;
 
-		if (_dragEndPoint.distanceTo(_dragStartPoint) <= DRAG_DEAD_ZONE_DISTANCE)
-			return;
-
 		deltaX = FlxMath.bound(deltaX, -DRAG_MAX_MOVEMENT, DRAG_MAX_MOVEMENT);
 		deltaY = FlxMath.bound(deltaY, -DRAG_MAX_MOVEMENT, DRAG_MAX_MOVEMENT);
-		FlxG.log.add(deltaX);
 
 		FlxG.camera.scroll.x += deltaX * DRAG_SMOOTH_FACTOR * -1;
 		FlxG.camera.scroll.y += deltaY * DRAG_SMOOTH_FACTOR * -1;
+
+		setCursorInUse(CURSOR_DRAGGING);
 	}
 	
 	/**
@@ -118,6 +121,7 @@ class Hand extends Tool
 	{
 		_dragHappening = true;
 		_dragStartPoint.set(_brain.flixelPointer.x, _brain.flixelPointer.y);
+		setCursorInUse(CURSOR_DRAGGING);
 	}
 	
 	/**
