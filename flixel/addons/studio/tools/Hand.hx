@@ -1,19 +1,18 @@
 package flixel.addons.studio.tools;
 
 import flash.display.BitmapData;
-import flash.display.Graphics;
 import flash.ui.Keyboard;
 import flixel.FlxBasic;
 import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
-import flixel.util.FlxSpriteUtil;
+import flixel.math.FlxMath;
 import flixel.system.debug.interaction.Interaction;
 import flixel.system.debug.interaction.tools.Tool;
 
-using flixel.util.FlxArrayUtil;
-
-@:bitmap("assets/images/debugger/cursorCross.png")
+@:bitmap("assets/images/tools/hand.png") 
 class GraphicCursorHand extends BitmapData {}
+
+@:bitmap("assets/images/tools/hand-closed.png") 
+class GraphicCursorHandClosed extends BitmapData {}
 
 /**
  * Allow the game camera to be freely moved around.
@@ -22,8 +21,12 @@ class GraphicCursorHand extends BitmapData {}
  */
 class Hand extends Tool
 {		
-	public static inline var MOVEMENT_SPEED:Float = 3;
-	public static inline var DRAG_SMOOTH:Float = 0.7;
+	static inline var CURSOR_DRAGGING = "handClosed";
+	
+	public static inline var KEYBOARD_MOVE_SPEED:Float = 3;
+	public static inline var DRAG_SMOOTH_FACTOR:Float = 0.7;
+	public static inline var DRAG_MAX_MOVEMENT:Float = 5;
+	public static inline var DRAG_DEAD_ZONE_DISTANCE:Float = 10;
 	
 	var _dragStartPoint:FlxPoint = new FlxPoint();
 	var _dragEndPoint:FlxPoint = new FlxPoint();
@@ -36,6 +39,8 @@ class Hand extends Tool
 		_name = "Hand";
 		setButton(GraphicCursorHand);
 		setCursor(new GraphicCursorHand(0, 0));
+
+		brain.registerCustomCursor(CURSOR_DRAGGING, new GraphicCursorHandClosed(0, 0));		
 		
 		return this;
 	}
@@ -66,20 +71,20 @@ class Hand extends Tool
 
 	function updateKeyboardBasedMove():Void
 	{
-		var deltaX = 0;
-		var deltaY = 0;
+		var deltaX:Float = 0;
+		var deltaY:Float = 0;
 
 		if (_brain.keyPressed(Keyboard.UP))
-			deltaY = -MOVEMENT_SPEED;
+			deltaY = -KEYBOARD_MOVE_SPEED;
 
 		if (_brain.keyPressed(Keyboard.DOWN))
-			deltaY = MOVEMENT_SPEED;
+			deltaY = KEYBOARD_MOVE_SPEED;
 
 		if (_brain.keyPressed(Keyboard.LEFT))
-			deltaX = -MOVEMENT_SPEED;
+			deltaX = -KEYBOARD_MOVE_SPEED;
 
 		if (_brain.keyPressed(Keyboard.RIGHT))
-			deltaX = MOVEMENT_SPEED;
+			deltaX = KEYBOARD_MOVE_SPEED;
 
 		FlxG.camera.scroll.x += deltaX;
 		FlxG.camera.scroll.y += deltaY;
@@ -89,11 +94,20 @@ class Hand extends Tool
 	{
 		_dragEndPoint.set(_brain.flixelPointer.x, _brain.flixelPointer.y);
 
-		var deltaX = _dragEndPoint.x - _dragStartPoint.x;
-		var deltaY = _dragEndPoint.y - _dragStartPoint.y;
+		setCursorInUse(CURSOR_DRAGGING);
 
-		FlxG.camera.scroll.x += deltaX * DRAG_SMOOTH * -1;
-		FlxG.camera.scroll.y += deltaY * DRAG_SMOOTH * -1;
+		var deltaX:Float = _dragEndPoint.x - _dragStartPoint.x;
+		var deltaY:Float = _dragEndPoint.y - _dragStartPoint.y;
+
+		if (_dragEndPoint.distanceTo(_dragStartPoint) <= DRAG_DEAD_ZONE_DISTANCE)
+			return;
+
+		deltaX = FlxMath.bound(deltaX, -DRAG_MAX_MOVEMENT, DRAG_MAX_MOVEMENT);
+		deltaY = FlxMath.bound(deltaY, -DRAG_MAX_MOVEMENT, DRAG_MAX_MOVEMENT);
+		FlxG.log.add(deltaX);
+
+		FlxG.camera.scroll.x += deltaX * DRAG_SMOOTH_FACTOR * -1;
+		FlxG.camera.scroll.y += deltaY * DRAG_SMOOTH_FACTOR * -1;
 	}
 	
 	/**
@@ -116,5 +130,6 @@ class Hand extends Tool
 		
 		_dragEndPoint.set(_brain.flixelPointer.x, _brain.flixelPointer.y);	
 		_dragHappening = false;
+		useDefaultCursor();
 	}
 }
