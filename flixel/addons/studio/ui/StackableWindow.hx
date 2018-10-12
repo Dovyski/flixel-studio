@@ -96,15 +96,12 @@ class StackableWindow extends flixel.system.debug.Window
 
 	function setFeatured(status:Bool, force:Bool = false):Void
 	{
-		if (_featured == status)
-			return;
-
 		_featured = status;
 		_content.visible = status;
 		_shadow.visible = status;
 		_background.visible = status;
 		_title.border = status;
-		_title.borderColor = 0xff0000;
+		_title.borderColor = 0xff0000; // TODO: improve how selected window is highlighted
 
 		if (_resizable)
 			_handle.visible = status;
@@ -219,46 +216,61 @@ class StackableWindow extends flixel.system.debug.Window
 	{
 		super.onMouseDown(e);
 
-		if (hasSiblings() && _overHeader)
+		if (hasSiblings())
 		{
-			setFeatured(true);
-			refreshSiblings();
+			var indexClickedTab = getIndexClickedTab(this.mouseX);
+			adjustFeaturedStatusFromActiveIndex(indexClickedTab);
+			refreshSiblings(indexClickedTab);
 		}
 	}
 
-	function refreshSiblings():Void
+	function adjustFeaturedStatusFromActiveIndex(activeIndex:Int = -1):Void
 	{
-		if (_siblingRight != null)
-			_siblingRight.updateBasedOnSibling(this, true, getTitleTabWidth());
-		if (_siblingLeft != null)
-			_siblingLeft.updateBasedOnSibling(this, false);
+		if (activeIndex == -1)
+			return;
+		
+		var featured = activeIndex == getOwnIndexRegardingSiblings();
+		setFeatured(featured);
 	}
 
-	function updateBasedOnSibling(commander:StackableWindow, toTheRight:Bool = true, offsetX:Float = 0):Void
+	function getIndexClickedTab(mouseX:Float):Int
 	{
-		// Decide on the next sibling based on the informed flow,
+		if (mouseX < 0 || mouseX > _width || _overHandle)
+			return -1;
+
+		var index = Std.int(mouseX / 60);
+		return index;
+	}
+
+	function refreshSiblings(activeIndex:Int = -1):Void
+	{
+		if (_siblingRight != null)
+			_siblingRight.updateBasedOnSibling(this, true, activeIndex);
+		if (_siblingLeft != null)
+			_siblingLeft.updateBasedOnSibling(this, false, activeIndex);
+	}
+
+	function updateBasedOnSibling(commander:StackableWindow, toTheRight:Bool = true, activeIndex:Int = -1):Void
+	{
+		// Decide the next sibling based on the informed flow,
 		// i.e. to the right or to the left.
 		var next = toTheRight ? _siblingRight : _siblingLeft;
 		
-		// offsetX is our position in relation to the window being dragged, i.e. commander
-		var nextOffsetX = offsetX + (toTheRight ? 1 : -1) * getTitleTabWidth();
-
 		if (commander != null && commander != this)
 		{
-			x = commander.x + offsetX + (toTheRight ? 0 : -getTitleTabWidth());
+			x = commander.x;
 			y = commander.y;
 			_width = commander._width;
 			_height = commander._height;
 			
 			super.updateSize();
-			adjustLayout();
-			adjustScrollMaskLayout();
 		}
 
-		if (next != null)
-			next.updateBasedOnSibling(commander, toTheRight, nextOffsetX);
+		adjustFeaturedStatusFromActiveIndex(activeIndex);
+		adjustLayout();
 
-		setFeatured(false);
+		if (next != null)
+			next.updateBasedOnSibling(commander, toTheRight, activeIndex);		
 	}
 
 	function needsScrollY():Bool
@@ -271,70 +283,51 @@ class StackableWindow extends flixel.system.debug.Window
 		super.updateSize();
 
 		adjustLayout();
-		adjustScrollMaskLayout();
 		refreshSiblings();
 	}
 
-	function adjustScrollMaskLayout():Void
-	{
-		if (!_scrollableY || _scrollMask == null)
-			return;
-
-		_scrollMask.width = _width;
-		_scrollMask.height = _height - HEADER_HEIGHT;
-
-		_scrollHandleY.x = _width - _scrollHandleY.width + _content.x;
-		updateScrollHandlesVisibility();
-	}	
-
 	function adjustLayout():Void
 	{
-		// If by any chance we are not ready yet, e.g. not added to the
-		// stage, we just don't do anything.
 		if (_content == null)
 			return;
 
-		var head = getLastLeftSibling();
-		_content.x = head.x - x;
+		_title.x = getOwnIndexRegardingSiblings() * 60;
+		
 		_background.scaleX = _width;
-		_background.x = _content.x;
-		_shadow.scaleX = _background.scaleX;
-		_shadow.x = _background.x;
-		_header.scaleX = _width + _content.x;
-
-		if (_scrollMask != null)
-			_scrollMask.x = _content.x;
+		_shadow.scaleX = _width;
+		_header.scaleX = _width;
+		_header.alpha = 0.1;
 
 		if (_resizable)
-			_handle.x = _content.x + _background.width - _handle.width;
+			_handle.x = _width - _handle.width;
+
+		if (_scrollableY && _scrollMask != null)
+		{
+			_scrollMask.width = _width;
+			_scrollMask.height = _height - HEADER_HEIGHT;			
+			_scrollHandleY.x = _width - _scrollHandleY.width;
+		}
 
 		updateScrollHandlesVisibility();
 	}
 
-	function getMaxWidthAmongSiblings():Float
+	function getOwnIndexRegardingSiblings():Int
 	{
 		var head = getLastLeftSibling();
-		var maxWidth:Float = head.x + head._width;
+
+		if (head == this)
+			return 0;
+
+		var position:Int = 1;
 		var sibling = head._siblingRight;
 
-		while (sibling != null)
+		while (sibling != null && sibling != this)
 		{
-			maxWidth = Math.max(maxWidth, sibling.x + sibling._width);
 			sibling = sibling._siblingRight;
+			position++;			
 		}
 
-		return maxWidth - head.x;
-	}
-
-	function adjustLayoutOfRightSiblings():Void
-	{
-		var sibling = _siblingRight;
-
-		while (sibling != null)
-		{
-			sibling.adjustLayout();
-			sibling = sibling._siblingRight;
-		}
+		return position;
 	}
 
 	public function addChildContent(child:DisplayObject, alwaysOnTop:Bool = false):DisplayObject
@@ -375,9 +368,7 @@ class StackableWindow extends flixel.system.debug.Window
 
 		// Update position and state of all windows in the chain
 		var head = getLastLeftSibling();
-		head.updateBasedOnSibling(head, true);
-		head.adjustLayout();
-		head.adjustLayoutOfRightSiblings();
+		head.updateBasedOnSibling(head, true, getOwnIndexRegardingSiblings());
 
 		// Make this window the active one
 		setFeatured(true);
