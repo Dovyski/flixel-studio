@@ -108,6 +108,9 @@ class StackableWindow extends flixel.system.debug.Window
 
 		if (_resizable)
 			_handle.visible = status;
+
+		if (_scrollableY && _scrollMask != null)
+			_scrollHandleY.visible = status;
 	}
 
 	override function onMouseMove(?e:MouseEvent):Void
@@ -237,6 +240,12 @@ class StackableWindow extends flixel.system.debug.Window
 		{
 			x = commander.x + offsetX + (toTheRight ? 0 : -getTitleTabWidth());
 			y = commander.y;
+			_width = commander._width;
+			_height = commander._height;
+			
+			super.updateSize();
+			adjustLayout();
+			adjustScrollMaskLayout();
 		}
 
 		if (next != null)
@@ -254,26 +263,39 @@ class StackableWindow extends flixel.system.debug.Window
 	{
 		super.updateSize();
 
+		adjustLayout();
+		adjustScrollMaskLayout();
+		refreshSiblings();
+	}
+
+	function adjustScrollMaskLayout():Void
+	{
 		if (!_scrollableY || _scrollMask == null)
 			return;
 
 		_scrollMask.width = _width;
 		_scrollMask.height = _height - HEADER_HEIGHT;
 
-		_scrollHandleY.x = _width - _scrollHandleY.width;
+		_scrollHandleY.x = _width - _scrollHandleY.width + _content.x;
 		_scrollHandleY.visible = needsScrollY();
-	}
+	}	
 
 	function adjustLayout():Void
 	{
-		var head = getLastLeftSibling();
-		var contentSize = getMaxWidthAmongSiblings();
+		// If by any chance we are not ready yet, e.g. not added to the
+		// stage, we just don't do anything.
+		if (_content == null)
+			return;
 
+		var head = getLastLeftSibling();
 		_content.x = head.x - x;
-		_background.scaleX = contentSize;
+		_background.scaleX = _width;
 		_background.x = _content.x;
 		_shadow.scaleX = _background.scaleX;
 		_shadow.x = _background.x;
+
+		if (_scrollMask != null)
+			_scrollMask.x = _content.x;
 
 		if (_resizable)
 			_handle.x = _content.x + _background.width - _handle.width;
