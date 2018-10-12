@@ -109,8 +109,15 @@ class StackableWindow extends flixel.system.debug.Window
 		if (_resizable)
 			_handle.visible = status;
 
-		if (_scrollableY && _scrollMask != null)
-			_scrollHandleY.visible = status;
+		updateScrollHandlesVisibility();
+	}
+
+	function updateScrollHandlesVisibility():Void
+	{
+		if (!_scrollableY || _scrollMask == null)
+			return;
+
+		_scrollHandleY.visible = _featured ? needsScrollY() : false;
 	}
 
 	override function onMouseMove(?e:MouseEvent):Void
@@ -277,7 +284,7 @@ class StackableWindow extends flixel.system.debug.Window
 		_scrollMask.height = _height - HEADER_HEIGHT;
 
 		_scrollHandleY.x = _width - _scrollHandleY.width + _content.x;
-		_scrollHandleY.visible = needsScrollY();
+		updateScrollHandlesVisibility();
 	}	
 
 	function adjustLayout():Void
@@ -293,12 +300,15 @@ class StackableWindow extends flixel.system.debug.Window
 		_background.x = _content.x;
 		_shadow.scaleX = _background.scaleX;
 		_shadow.x = _background.x;
+		_header.scaleX = _width + _content.x;
 
 		if (_scrollMask != null)
 			_scrollMask.x = _content.x;
 
 		if (_resizable)
 			_handle.x = _content.x + _background.width - _handle.width;
+
+		updateScrollHandlesVisibility();
 	}
 
 	function getMaxWidthAmongSiblings():Float
