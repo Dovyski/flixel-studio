@@ -15,6 +15,9 @@ import flixel.addons.studio.core.LibraryItem;
 
 using flixel.system.debug.DebuggerUtil;
 
+@:bitmap("assets/images/icons/group.png") 
+class GraphicLibraryWindowIcon extends BitmapData {}
+
 /**
  * TODO: add docs
  * 
@@ -45,7 +48,7 @@ class LibraryWindow extends StackableWindow
 	 */
 	public function new(library:Library)
 	{
-		super("Library", null, 200, 200, true);
+		super("Library", new GraphicLibraryWindowIcon(0, 0), 200, 200, true);
 		_library = library;
 		
 		x = 5;
