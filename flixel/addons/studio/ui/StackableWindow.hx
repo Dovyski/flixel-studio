@@ -5,6 +5,7 @@ import flash.display.Shape;
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.events.MouseEvent;
+import flash.events.Event;
 import flash.geom.Rectangle;
 import flash.geom.Point;
 import flixel.math.FlxMath;
@@ -62,6 +63,14 @@ class StackableWindow extends flixel.system.debug.Window
 		createScrollInfra();
 		setScrollable(true);
 		addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+		addEventListener(Event.ADDED, onAddedToDisplayList);
+	}
+
+	function onAddedToDisplayList(?e:Event):Void
+	{
+		e.preventDefault();
+		adjustLayout();
+		removeEventListener(Event.ADDED, onAddedToDisplayList);
 	}
 
 	function createScrollHandle(width:Int, height:Int):Sprite
@@ -101,7 +110,9 @@ class StackableWindow extends flixel.system.debug.Window
 		_shadow.visible = status;
 		_background.visible = status;
 		_title.border = status;
-		_title.borderColor = 0xff0000; // TODO: improve how selected window is highlighted
+		_title.borderColor = flixel.system.debug.Window.BG_COLOR;
+		_title.background = status;
+		_title.backgroundColor = flixel.system.debug.Window.BG_COLOR;
 
 		if (_resizable)
 			_handle.visible = status;
@@ -218,39 +229,59 @@ class StackableWindow extends flixel.system.debug.Window
 
 		if (hasSiblings())
 		{
-			var indexClickedTab = getIndexClickedTab(this.mouseX);
-			adjustFeaturedStatusFromActiveIndex(indexClickedTab);
-			refreshSiblings(indexClickedTab);
+			var clickedIndex = getSiblingIndexFromMouseClickInTitles(this.mouseX, this.mouseY);
+			adjustFeaturedStatusFromActiveSiblingIndex(clickedIndex);
+			refreshSiblings(clickedIndex);
 		}
 	}
 
-	function adjustFeaturedStatusFromActiveIndex(activeIndex:Int = -1):Void
+	function adjustFeaturedStatusFromActiveSiblingIndex(activeSiblingIndex:Int = -1):Void
 	{
-		if (activeIndex == -1)
+		if (activeSiblingIndex == -1)
 			return;
 		
-		var featured = activeIndex == getOwnIndexRegardingSiblings();
+		var featured = activeSiblingIndex == getIndexAmongSiblings();
 		setFeatured(featured);
 	}
 
-	function getIndexClickedTab(mouseX:Float):Int
+	function getSiblingIndexFromMouseClickInTitles(mouseX:Float, mouseY:Float):Int
 	{
+		// If the click occurred outside the window bounds, or it was related to
+		// the resize handle, we inform that no window title had actually being
+		// clicked in this interaction.
 		if (mouseX < 0 || mouseX > _width || _overHandle)
 			return -1;
 
-		var index = Std.int(mouseX / 60);
-		return index;
+		var index = 0;
+		var found = false;
+		var currentX:Float = 0;
+		var sibling = getLeftMostSibling();
+
+		while (sibling != null)
+		{
+			if (mouseX >= currentX && mouseX <= (currentX + sibling.getTitleWidth()))
+			{
+				found = true;
+				break;
+			}
+
+			index++;
+			currentX += sibling.getTitleWidth();
+			sibling = sibling._siblingRight;
+		}
+
+		return found ? index : -1;
 	}
 
-	function refreshSiblings(activeIndex:Int = -1):Void
+	function refreshSiblings(activeSiblingIndex:Int = -1):Void
 	{
 		if (_siblingRight != null)
-			_siblingRight.updateBasedOnSibling(this, true, activeIndex);
+			_siblingRight.updateBasedOnSibling(this, true, activeSiblingIndex);
 		if (_siblingLeft != null)
-			_siblingLeft.updateBasedOnSibling(this, false, activeIndex);
+			_siblingLeft.updateBasedOnSibling(this, false, activeSiblingIndex);
 	}
 
-	function updateBasedOnSibling(commander:StackableWindow, toTheRight:Bool = true, activeIndex:Int = -1):Void
+	function updateBasedOnSibling(commander:StackableWindow, toTheRight:Bool = true, activeSiblingIndex:Int = -1):Void
 	{
 		// Decide the next sibling based on the informed flow,
 		// i.e. to the right or to the left.
@@ -266,11 +297,11 @@ class StackableWindow extends flixel.system.debug.Window
 			super.updateSize();
 		}
 
-		adjustFeaturedStatusFromActiveIndex(activeIndex);
+		adjustFeaturedStatusFromActiveSiblingIndex(activeSiblingIndex);
 		adjustLayout();
 
 		if (next != null)
-			next.updateBasedOnSibling(commander, toTheRight, activeIndex);		
+			next.updateBasedOnSibling(commander, toTheRight, activeSiblingIndex);		
 	}
 
 	function needsScrollY():Bool
@@ -281,22 +312,65 @@ class StackableWindow extends flixel.system.debug.Window
 	override function updateSize():Void
 	{
 		super.updateSize();
-
 		adjustLayout();
 		refreshSiblings();
 	}
 
+	function getMinWidthHouseAllSiblingsTitles():Float
+	{
+		var head = getLeftMostSibling();
+		var minWidth = head.getTitleWidth();
+		var sibling = head._siblingRight;
+
+		while (sibling != null)
+		{
+			minWidth += sibling.getTitleWidth();
+			sibling = sibling._siblingRight;
+		}
+
+		return minWidth;
+	}
+
+	function shouldDisplayHeaderBar():Bool
+	{
+		var head = getLeftMostSibling();
+
+		// If we have no parent yet, there is no way to know if
+		// we have the lowest Z coordinate. In such case, we display
+		// the header bar if we are the first window in the chain
+		// (it is not garanteed to work, but it's something).
+		if (head.parent == null || parent == null)
+			return getIndexAmongSiblings() == 0;
+
+		var myZ = parent.getChildIndex(this);
+		var lowestZ = head.parent.getChildIndex(head);
+		var sibling = head._siblingRight;
+
+		while (sibling != null)
+		{
+			var siblingZ = sibling.parent == null ? lowestZ : sibling.parent.getChildIndex(sibling);
+			lowestZ = Std.int(Math.min(lowestZ, siblingZ));
+			sibling = sibling._siblingRight;
+		}
+
+		return myZ == lowestZ;
+	}
+
 	function adjustLayout():Void
 	{
-		if (_content == null)
-			return;
+		if (hasSiblings())
+		{
+			_title.x = calculateTitleOffsetFromSiblings();
+			_header.visible = shouldDisplayHeaderBar();
 
-		_title.x = getOwnIndexRegardingSiblings() * 60;
+			var minWidth = Std.int(getMinWidthHouseAllSiblingsTitles());
+			if (_width <= minWidth)
+				_width = minWidth;
+		}
 		
 		_background.scaleX = _width;
 		_shadow.scaleX = _width;
 		_header.scaleX = _width;
-		_header.alpha = 0.1;
 
 		if (_resizable)
 			_handle.x = _width - _handle.width;
@@ -311,9 +385,28 @@ class StackableWindow extends flixel.system.debug.Window
 		updateScrollHandlesVisibility();
 	}
 
-	function getOwnIndexRegardingSiblings():Int
+	function calculateTitleOffsetFromSiblings():Float
 	{
-		var head = getLastLeftSibling();
+		var head = getLeftMostSibling();
+
+		if (head == this)
+			return 0;
+
+		var offset:Float = head.getTitleWidth();
+		var sibling = head._siblingRight;
+
+		while (sibling != null && sibling != this)
+		{
+			offset += sibling.getTitleWidth();
+			sibling = sibling._siblingRight;			
+		}
+
+		return offset;
+	}
+
+	function getIndexAmongSiblings():Int
+	{
+		var head = getLeftMostSibling();
 
 		if (head == this)
 			return 0;
@@ -347,7 +440,7 @@ class StackableWindow extends flixel.system.debug.Window
 			refreshSiblings();
 	}
 
-	public function getTitleTabWidth():Float
+	public function getTitleWidth():Float
 	{
 		return _title.textWidth + 10;
 	}
@@ -362,13 +455,13 @@ class StackableWindow extends flixel.system.debug.Window
 		if (target == null)
 			throw "target window to be attached to must not be null";
 
-		var lastSibling = target.getLastRightSibling();
+		var lastSibling = target.getRightMostSibling();
 		lastSibling._siblingRight = this;
 		this._siblingLeft = lastSibling;
 
 		// Update position and state of all windows in the chain
-		var head = getLastLeftSibling();
-		head.updateBasedOnSibling(head, true, getOwnIndexRegardingSiblings());
+		var head = getLeftMostSibling();
+		head.updateBasedOnSibling(head, true, getIndexAmongSiblings());
 
 		// Make this window the active one
 		setFeatured(true);
@@ -387,7 +480,7 @@ class StackableWindow extends flixel.system.debug.Window
 		_content.mask = status ? _scrollMask : null;
 	}
 
-	public function getLastRightSibling():StackableWindow
+	public function getRightMostSibling():StackableWindow
 	{
 		var sibling:StackableWindow = _siblingRight;
 		while (sibling != null)
@@ -400,7 +493,7 @@ class StackableWindow extends flixel.system.debug.Window
 		return sibling == null ? this : sibling;
 	}
 
-	public function getLastLeftSibling():StackableWindow
+	public function getLeftMostSibling():StackableWindow
 	{
 		var sibling:StackableWindow = _siblingLeft;
 		while (sibling != null)
