@@ -73,7 +73,7 @@ class Tile extends Tool
 		
 			tileHightligh.width = tilemap.width / tilemap.widthInTiles;
 			tileHightligh.height = tilemap.height / tilemap.heightInTiles;
-			tileHightligh.makeGraphic(cast tileHightligh.width, cast tileHightligh.height, 0xffff0000);
+			tileHightligh.makeGraphic(Std.int(tileHightligh.width), Std.int(tileHightligh.height), 0xffff0000);
 		}
 		
 		properties.refresh(tilemap);
