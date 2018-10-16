@@ -18,6 +18,13 @@ class TileSelectionWindow extends Window
 {
 	public var selectedTile(default, null):Int;
 	
+	/**
+	 * Controls the scale in which the tilemap graphics will be displayed in
+	 * the tile selection window. It has nothing to do with the game's zoom or
+	 * scale factor, it is solely related to how the tile selection window
+	 * displays its content.
+	 */
+	private var _viewScale:Float;
 	private var _tileTool:Tile;
 	private var _tileHightligh:Sprite;
 	private var _tileSelected:Sprite;
@@ -32,12 +39,17 @@ class TileSelectionWindow extends Window
 		_tilemapBitmap = new Bitmap();
 		
 		_tilemapGraphic.addChild(_tilemapBitmap);
-		
 		_tilemapGraphic.y = 20;
-		_tilemapGraphic.scaleX = 2; // TODO: get values from Flixel
-		_tilemapGraphic.scaleY = 2; // TODO: get values from Flixel
-		
 		addChild(_tilemapGraphic);
+	}
+
+	private function setViewScale(value:Float):Void
+	{
+		_viewScale = value;
+		_tilemapGraphic.scaleX = _viewScale;
+		_tilemapGraphic.scaleY = _viewScale;
+
+		updateHighlightedSelection();
 	}
 	
 	private function adjustComponentSizes(referenceTile:FlxSprite):Void
@@ -45,14 +57,14 @@ class TileSelectionWindow extends Window
 		_tileHightligh.graphics.clear();
 		_tileHightligh.graphics.lineStyle(1, 0xee0000);
 		_tileHightligh.graphics.drawRect(0, 0, referenceTile.width, referenceTile.height);
-		_tileHightligh.width = referenceTile.width * FlxG.scaleMode.scale.x;
-		_tileHightligh.height = referenceTile.height * FlxG.scaleMode.scale.y;
+		_tileHightligh.width = referenceTile.width * _viewScale;
+		_tileHightligh.height = referenceTile.height * _viewScale;
 		
 		_tileSelected.graphics.clear();
 		_tileSelected.graphics.lineStyle(1, 0xff0000);
 		_tileSelected.graphics.drawRect(0, 0, referenceTile.width, referenceTile.height);
-		_tileSelected.width = referenceTile.width * FlxG.scaleMode.scale.x;
-		_tileSelected.height = referenceTile.height * FlxG.scaleMode.scale.y;
+		_tileSelected.width = referenceTile.width * _viewScale;
+		_tileSelected.height = referenceTile.height * _viewScale;
 	}
 	
 	public function new(tileTool:Tile, x:Float, y:Float) 
@@ -77,6 +89,8 @@ class TileSelectionWindow extends Window
 		addChild(_tileSelected);
 		addChild(_tileHightligh);
 		
+		// Adjust how the tilemap will be displayed in this window (tile seleciton window)
+		setViewScale(2);
 		reposition(x, y);
 		
 		_tilemapGraphic.addEventListener(MouseEvent.MOUSE_MOVE, handleMouseOverGraphic);
@@ -96,7 +110,7 @@ class TileSelectionWindow extends Window
 			adjustComponentSizes(_tileTool.tileHightligh);
 			
 			_tilemapBitmap.bitmapData = _tilemap.frames.parent.bitmap;
-			resize(_tilemapBitmap.bitmapData.width * 2 + 5, _tilemapBitmap.bitmapData.height * 2 + _tilemapGraphic.y + 5);
+			resize(_tilemapBitmap.bitmapData.width * _viewScale + 5, _tilemapBitmap.bitmapData.height * _viewScale + _tilemapGraphic.y + 5);
 		}
 	}
 	
@@ -129,8 +143,8 @@ class TileSelectionWindow extends Window
 	
 	private function updateHighlightedSelection():Void
 	{
-		_tileHightligh.x = _graphicTile.x * FlxG.scaleMode.scale.x;
-		_tileHightligh.y = _graphicTile.y * FlxG.scaleMode.scale.y;
+		_tileHightligh.x = _graphicTile.x * _viewScale;
+		_tileHightligh.y = _graphicTile.y * _viewScale;
 		
 		_tileHightligh.x += _tilemapGraphic.x;
 		_tileHightligh.y += _tilemapGraphic.y;
