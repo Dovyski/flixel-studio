@@ -74,6 +74,7 @@ class ScrollArea extends Sprite
 		addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 		addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 		addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+		FlxG.stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 	}
 
 	function createScrollHandle(width:Int, height:Int):Sprite
@@ -88,22 +89,20 @@ class ScrollArea extends Sprite
 		return handle;
 	}
 
-	function updateScrollHandlesVisibility():Void
+	function updateScrollHandlesAppearance():Void
 	{
 		if (!_scrollableY || _scrollMask == null)
 			return;
 
 		_scrollHandleY.visible = needsScrollY();
+		
+		var adjustedHeight = SCROLL_HANDLE_HEIGHT / getContentScrollMaskRatio();
+		_scrollHandleY.height = FlxMath.bound(adjustedHeight, SCROLL_HANDLE_HEIGHT * 0.5, SCROLL_HANDLE_HEIGHT * 1.3);
 	}
 
 	function isScrolling():Bool
 	{
 		return _scrollableY && _usingScrollHandleY;
-	}
-
-	function isScrollable():Bool
-	{
-		return _scrollMask != null && _scrollableY;
 	}
 
 	function onMouseMove(?e:MouseEvent):Void
@@ -119,7 +118,8 @@ class ScrollArea extends Sprite
 
 	function calculateScrollHandleYProgress():Float
 	{
-		var progress = _scrollHandleY.y / _scrollMask.height;
+		var progress = _scrollHandleY.y / (_scrollMask.height - _scrollHandleY.height);
+		progress = FlxMath.bound(progress, 0, 1);
 		return progress;
 	}
 
@@ -146,13 +146,25 @@ class ScrollArea extends Sprite
 		ensureScrollBoundaries();
 	}
 
+	function getAdjustedScrollSpeed():Float
+	{
+		var ratio = getContentScrollMaskRatio();
+		var factor = FlxMath.bound(ratio, 1, 5);
+		return scrollSpeed / factor;
+	}
+
+	function getContentScrollMaskRatio():Float
+	{
+		return _content.height / _scrollMask.height;
+	}
+
 	function onMouseWheel(?e:MouseEvent):Void
 	{
 		if (!_scrollableY)
 			return;
 		
 		var isScrollingUp = e.delta > 0;
-		_scrollHandleY.y += scrollSpeed * (isScrollingUp ? -1 : 1);
+		_scrollHandleY.y += getAdjustedScrollSpeed() * (isScrollingUp ? -1 : 1);
 		
 		ensureScrollHandleBoundaries();
 		var handleProgress = calculateScrollHandleYProgress();
@@ -214,11 +226,12 @@ class ScrollArea extends Sprite
 		if (_scrollableY && _scrollMask != null)
 		{
 			_scrollMask.width = width;
-			_scrollMask.height = height;			
+			_scrollMask.height = height;
 			_scrollHandleY.x = width - _scrollHandleY.width;
 		}
 
-		updateScrollHandlesVisibility();
+		updateScrollHandlesAppearance();
+		ensureScrollHandleBoundaries();
 	}
 
 	public function addContent(child:DisplayObject):DisplayObject
@@ -252,6 +265,7 @@ class ScrollArea extends Sprite
 		_scrollHandleY = null;
 		removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 		removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-		removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);		
+		removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+		FlxG.stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 	}
 }

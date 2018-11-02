@@ -79,9 +79,6 @@ class StackableWindow extends flixel.system.debug.Window
 
 		if (_resizable)
 			_handle.visible = status;
-
-		if (_content.visible)
-			_content.resize(_width, _height);
 	}
 
 	override function onMouseDown(?e:MouseEvent):Void
@@ -229,7 +226,7 @@ class StackableWindow extends flixel.system.debug.Window
 		_header.scaleX = _width;
 		
 		if (_content != null)
-			_content.resize(_width, _height);
+			_content.resize(_width, _height - _content.y);
 
 		if (_resizable)
 			_handle.x = _width - _handle.width;
