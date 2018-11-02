@@ -89,6 +89,8 @@ class EntitiesWindow extends StackableWindow
 	{
 		super.resize(width, height);
 		updateEntriesPosition();
+
+		_bottomBar.y = height - 15;
 	}
 
 	public function selectEntityRow(entityRow:EntityRow):Void
@@ -109,7 +111,7 @@ class EntitiesWindow extends StackableWindow
 		_entriesContainer = new Sprite();
 		_entriesContainer.x = 0;
 		_entriesContainer.y = _topBar.y + _topBar.height;
-		addChildContent(_entriesContainer);
+		addContent(_entriesContainer);
 	}
 
 	function createTopBar():Void
@@ -133,7 +135,7 @@ class EntitiesWindow extends StackableWindow
 		_topBar.addChild(_visibilityButton);
 		_topBar.addChild(_lockButton);
 
-		addChildContent(_topBar);
+		addContent(_topBar);
 	}
 
 	function createBottomBar():Void
@@ -149,7 +151,7 @@ class EntitiesWindow extends StackableWindow
 		_addButton.alpha = 0.7;
 		
 		_bottomBar.addChild(_addButton);
-		addChildContent(_bottomBar, true);
+		addChild(_bottomBar);
 	}
 
 	function addEntry(entity:Entity, updatePosition:Bool = true):Void

@@ -158,7 +158,7 @@ class LibraryWindow extends StackableWindow
 		_rowsContainer = new Sprite();
 		_rowsContainer.x = 0;
 		_rowsContainer.y = 0;
-		addChildContent(_rowsContainer);
+		addContent(_rowsContainer);
 	}
 
 	function createBottomBar():Void
@@ -174,7 +174,7 @@ class LibraryWindow extends StackableWindow
 		_addButton.alpha = 0.7;
 		
 		_bottomBar.addChild(_addButton);
-		addChildContent(_bottomBar, true);
+		addChild(_bottomBar);
 	}
 
 	function addRow(item:LibraryItem, updatePosition:Bool = true):Void

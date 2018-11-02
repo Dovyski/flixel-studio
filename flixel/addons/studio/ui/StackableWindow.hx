@@ -18,16 +18,16 @@ import flixel.math.FlxMath;
 class StackableWindow extends flixel.system.debug.Window
 {
 	public static var HEADER_HEIGHT:Int = 15;
-	public static var SCROLL_HANDLE_WIDTH:Int = 5;
-	public static var SCROLL_HANDLE_HEIGHT:Int = 20;
-	
-	public var scrollSpeed:Float = 15.0;
 	
 	var _siblingLeft:StackableWindow;
 	var _siblingRight:StackableWindow;
 	var _content:ScrollArea;
-	var _overlays:Sprite;
-	var _featured:Bool;
+	
+	/**
+	 * When the window is attached to other windows, this property controls
+	 * if this window is the active one (the one being viewed by the user).
+	 */
+	var _activeTab:Bool;
 	
 	/**
 	 * Creates a new window object.  This Flash-based class is mainly (only?) used by FlxDebugger.
@@ -45,16 +45,13 @@ class StackableWindow extends flixel.system.debug.Window
 	{
 		super(title, icon, width, height, resizable, bounds, closable);
 		visible = true;
-		_featured = true;
+		_activeTab = true;
 		
 		_content = new ScrollArea();
-		_overlays = new Sprite();
-		_content.x = _overlays.x = 0;
-		_content.y = _overlays.y = HEADER_HEIGHT;
+		_content.x = 0;
+		_content.y = HEADER_HEIGHT;
 		_content.setScrollable(true);
-
 		addChild(_content);
-		addChild(_overlays);
 
 		addEventListener(Event.ADDED, onAddedToDisplayList);
 	}
@@ -66,9 +63,9 @@ class StackableWindow extends flixel.system.debug.Window
 		removeEventListener(Event.ADDED, onAddedToDisplayList);
 	}
 
-	function setFeatured(status:Bool, force:Bool = false):Void
+	function setActiveTab(status:Bool, force:Bool = false):Void
 	{
-		_featured = status;
+		_activeTab = status;
 		_content.visible = status;
 		_shadow.visible = status;
 		_background.visible = status;
@@ -88,18 +85,18 @@ class StackableWindow extends flixel.system.debug.Window
 		if (hasSiblings())
 		{
 			var clickedIndex = getSiblingIndexFromMouseClickInTitles(this.mouseX, this.mouseY);
-			adjustFeaturedStatusFromActiveSiblingIndex(clickedIndex);
+			adjustActiveTabStatusFromActiveSiblingIndex(clickedIndex);
 			refreshSiblings(clickedIndex);
 		}
 	}
 
-	function adjustFeaturedStatusFromActiveSiblingIndex(activeSiblingIndex:Int = -1):Void
+	function adjustActiveTabStatusFromActiveSiblingIndex(activeSiblingIndex:Int = -1):Void
 	{
 		if (activeSiblingIndex == -1)
 			return;
 		
-		var featured = activeSiblingIndex == getIndexAmongSiblings();
-		setFeatured(featured);
+		var isActiveTab = activeSiblingIndex == getIndexAmongSiblings();
+		setActiveTab(isActiveTab);
 	}
 
 	function getSiblingIndexFromMouseClickInTitles(mouseX:Float, mouseY:Float):Int
@@ -155,7 +152,7 @@ class StackableWindow extends flixel.system.debug.Window
 			super.updateSize();
 		}
 
-		adjustFeaturedStatusFromActiveSiblingIndex(activeSiblingIndex);
+		adjustActiveTabStatusFromActiveSiblingIndex(activeSiblingIndex);
 		adjustLayout();
 
 		if (next != null)
@@ -270,7 +267,7 @@ class StackableWindow extends flixel.system.debug.Window
 		return position;
 	}
 
-	public function addChildContent(child:DisplayObject, alwaysOnTop:Bool = false):DisplayObject
+	public function addContent(child:DisplayObject):DisplayObject
 	{
 		var element = _content.addContent(child);
 		updateSize();
@@ -310,7 +307,7 @@ class StackableWindow extends flixel.system.debug.Window
 		head.updateBasedOnSibling(head, true, getIndexAmongSiblings());
 
 		// Make this window the active one
-		setFeatured(true);
+		setActiveTab(true);
 	}
 
 	public function detach():Void
@@ -354,10 +351,6 @@ class StackableWindow extends flixel.system.debug.Window
 			removeChild(_content);
 		}
 
-		if (_overlays != null)
-			removeChild(_overlays);
-
 		_content = null;
-		_overlays = null;
 	}
 }
