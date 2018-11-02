@@ -25,13 +25,9 @@ class StackableWindow extends flixel.system.debug.Window
 	
 	var _siblingLeft:StackableWindow;
 	var _siblingRight:StackableWindow;
-	var _content:Sprite;
+	var _content:ScrollArea;
 	var _overlays:Sprite;
 	var _featured:Bool;
-	var _scrollMask:Shape;
-	var _scrollHandleY:Sprite;
-	var _scrollableY:Bool;
-	var _usingScrollHandleY:Bool;
 	
 	/**
 	 * Creates a new window object.  This Flash-based class is mainly (only?) used by FlxDebugger.
@@ -50,19 +46,16 @@ class StackableWindow extends flixel.system.debug.Window
 		super(title, icon, width, height, resizable, bounds, closable);
 		visible = true;
 		_featured = true;
-		_usingScrollHandleY = false;
 		
-		_content = new Sprite();
+		_content = new ScrollArea();
 		_overlays = new Sprite();
 		_content.x = _overlays.x = 0;
 		_content.y = _overlays.y = HEADER_HEIGHT;
-		
+		_content.setScrollable(true);
+
 		addChild(_content);
 		addChild(_overlays);
 
-		createScrollInfra();
-		setScrollable(true);
-		addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 		addEventListener(Event.ADDED, onAddedToDisplayList);
 	}
 
@@ -71,36 +64,6 @@ class StackableWindow extends flixel.system.debug.Window
 		e.preventDefault();
 		adjustLayout();
 		removeEventListener(Event.ADDED, onAddedToDisplayList);
-	}
-
-	function createScrollHandle(width:Int, height:Int):Sprite
-	{
-		var handle = new Sprite();
-		handle.x = 0;
-		handle.y = 0;
-		handle.graphics.beginFill(0x333333);
-		handle.graphics.drawRect(0, 0, width, height);
-		handle.graphics.endFill();
-
-		return handle;
-	}
-
-	function createScrollInfra():Void
-	{
-		_scrollHandleY = createScrollHandle(SCROLL_HANDLE_WIDTH, SCROLL_HANDLE_HEIGHT);
-		_scrollHandleY.y = 0;
-		_scrollHandleY.addEventListener(MouseEvent.MOUSE_DOWN, onScrollHandleMouseEvent);
-		_overlays.addChild(_scrollHandleY);
-
-		_scrollMask = new Shape();
-		_scrollMask.graphics.beginFill(0xFF0000, 1);
-		_scrollMask.graphics.drawRect(0, 0, 10, 10);
-		_scrollMask.graphics.endFill();
-
-		_scrollMask.x = _overlays.x;
-		_scrollMask.y = _overlays.y;
-		_scrollMask.visible = false;
-		addChild(_scrollMask);
 	}
 
 	function setFeatured(status:Bool, force:Bool = false):Void
@@ -117,110 +80,8 @@ class StackableWindow extends flixel.system.debug.Window
 		if (_resizable)
 			_handle.visible = status;
 
-		updateScrollHandlesVisibility();
-	}
-
-	function updateScrollHandlesVisibility():Void
-	{
-		if (!_scrollableY || _scrollMask == null)
-			return;
-
-		_scrollHandleY.visible = _featured ? needsScrollY() : false;
-	}
-
-	override function onMouseMove(?e:MouseEvent):Void
-	{
-		super.onMouseMove(e);
-
-		if (!_usingScrollHandleY || !_scrollableY)
-			return;
-
-		var point = localToGlobal(new Point(_scrollMask.x, _scrollMask.y));
-		_scrollHandleY.y = FlxMath.bound(e.stageY - point.y, 0, _scrollMask.height);
-		var handleProgress = calculateScrollHandleYProgress();
-		setScrollProgressY(handleProgress);
-	}
-
-	function calculateScrollHandleYProgress():Float
-	{
-		var progress = _scrollHandleY.y / (_scrollMask.height - HEADER_HEIGHT);
-		return progress;
-	}
-
-	override function onMouseUp(?e:MouseEvent):Void
-	{
-		super.onMouseUp(e);
-		if (_scrollableY)
-			onScrollHandleMouseEvent(null);
-	}
-
-	function onScrollHandleMouseEvent(?e:MouseEvent):Void
-	{
-		if (!_scrollableY)
-			return;
-
-		if (e != null && e.type == MouseEvent.MOUSE_DOWN)
-			_usingScrollHandleY = true;
-		else
-		{
-			_usingScrollHandleY = false;
-			ensureScrollBoundaries();			
-		}
-	}
-
-	function onMouseWheel(?e:MouseEvent):Void
-	{
-		if (!_scrollableY)
-			return;
-		
-		var isScrollingUp = e.delta > 0;
-		_scrollHandleY.y += scrollSpeed * (isScrollingUp ? -1 : 1);
-		
-		ensureScrollHandleBoundaries();
-		var handleProgress = calculateScrollHandleYProgress();
-		setScrollProgressY(handleProgress);
-	}
-
-	public function setScrollProgressY(progress:Float):Void
-	{
-		var totalNonVisibleArea = Math.max(_content.height + HEADER_HEIGHT - _scrollMask.height, 0);
-
-		progress = FlxMath.bound(progress, 0, 1);
-		_content.y = - totalNonVisibleArea * progress;
-
-		ensureScrollBoundaries();
-	}
-
-	function ensureScrollBoundaries():Void
-	{
-		if (_content.y + _content.height < _scrollMask.height)
-			_content.y = _scrollMask.height - _content.height;
-
-		if (_content.y >= 0)
-			_content.y = _scrollMask.y;
-
-		ensureScrollHandleBoundaries();
-	}
-
-	function ensureScrollHandleBoundaries():Void
-	{
-		if (_scrollHandleY.y <= 0)
-			_scrollHandleY.y = 0;
-		
-		if (_scrollHandleY.y + _scrollHandleY.height >= _scrollMask.height - _handle.height)
-			_scrollHandleY.y =  _scrollMask.height - _handle.height - _scrollHandleY.height;
-	}	
-
-	function getScrollingProgress():Float
-	{
-		var totalNonVisibleArea = Math.max(0, _content.height - _scrollMask.height + HEADER_HEIGHT);
-		var currentNonVisibleArea = Math.max(0, (_content.y + _content.height) - _scrollMask.height);
-
-		if (totalNonVisibleArea <= 0)
-			return 0;
-
-		var progress = Math.max(0, 1 - currentNonVisibleArea / totalNonVisibleArea);
-		return progress;
+		if (_content.visible)
+			_content.resize(_width, _height);
 	}
 
 	override function onMouseDown(?e:MouseEvent):Void
@@ -304,11 +165,6 @@ class StackableWindow extends flixel.system.debug.Window
 			next.updateBasedOnSibling(commander, toTheRight, activeSiblingIndex);		
 	}
 
-	function needsScrollY():Bool
-	{
-		return _content.height + HEADER_HEIGHT > _scrollMask.height;
-	}
-
 	override function updateSize():Void
 	{
 		super.updateSize();
@@ -371,18 +227,12 @@ class StackableWindow extends flixel.system.debug.Window
 		_background.scaleX = _width;
 		_shadow.scaleX = _width;
 		_header.scaleX = _width;
+		
+		if (_content != null)
+			_content.resize(_width, _height);
 
 		if (_resizable)
 			_handle.x = _width - _handle.width;
-
-		if (_scrollableY && _scrollMask != null)
-		{
-			_scrollMask.width = _width;
-			_scrollMask.height = _height - HEADER_HEIGHT;			
-			_scrollHandleY.x = _width - _scrollHandleY.width;
-		}
-
-		updateScrollHandlesVisibility();
 	}
 
 	function calculateTitleOffsetFromSiblings():Float
@@ -425,8 +275,7 @@ class StackableWindow extends flixel.system.debug.Window
 
 	public function addChildContent(child:DisplayObject, alwaysOnTop:Bool = false):DisplayObject
 	{
-		var container = alwaysOnTop ? _overlays : _content;
-		var element = container.addChild(child);
+		var element = _content.addContent(child);
 		updateSize();
 
 		return element;
@@ -472,14 +321,6 @@ class StackableWindow extends flixel.system.debug.Window
 		// TODO: implement this
 	}
 
-	public function setScrollable(status:Bool):Void
-	{
-		_scrollableY = status;
-		_scrollMask.visible = status;
-		_content.y = _scrollMask.y;
-		_content.mask = status ? _scrollMask : null;
-	}
-
 	public function getRightMostSibling():StackableWindow
 	{
 		var sibling:StackableWindow = _siblingRight;
@@ -511,21 +352,15 @@ class StackableWindow extends flixel.system.debug.Window
 		super.destroy();
 
 		if (_content != null)
+		{
+			_content.destroy();
 			removeChild(_content);
+		}
 
 		if (_overlays != null)
 			removeChild(_overlays);
 
-		if (_scrollMask != null)
-			removeChild(_scrollMask);
-
-		if (_scrollHandleY != null)
-			removeChild(_scrollHandleY);
-
 		_content = null;
 		_overlays = null;
-		_scrollMask = null;
-		_scrollHandleY = null;
-		removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 	}
 }
