@@ -3,6 +3,7 @@ package flixel.addons.studio.ui;
 import flash.display.Sprite;
 import flash.display.Shape;
 import flash.display.BitmapData;
+import flash.display.Bitmap;
 import flash.display.DisplayObject;
 import flash.events.MouseEvent;
 import flash.events.Event;
@@ -31,6 +32,7 @@ class TabWindow extends flixel.system.debug.Window
 	var _siblingLeft:TabWindow;
 	var _siblingRight:TabWindow;
 	var _content:ScrollArea;
+	var _activeTabHighlight:Bitmap;
 	
 	/**
 	 * When the window is attached to other windows, this property controls
@@ -52,7 +54,7 @@ class TabWindow extends flixel.system.debug.Window
 	public function new(title:String, ?icon:BitmapData, width:Float = 0, height:Float = 0, resizable:Bool = true,
 		?bounds:Rectangle, closable:Bool = false)
 	{
-		super(title, icon, width, height, resizable, bounds, closable);
+		super(title, icon, width, height, resizable, bounds, closable, false);
 		visible = true;
 		_activeTab = true;
 		
@@ -62,6 +64,9 @@ class TabWindow extends flixel.system.debug.Window
 		_content.setScrollable(true);
 		_content.scrollYPadding.bottom = _handle.height;
 		addChild(_content);
+
+		_activeTabHighlight = new Bitmap(new BitmapData(1, 1, true, flixel.system.debug.Window.BG_COLOR));
+		addChildAt(_activeTabHighlight, getChildIndex(_title));
 
 		addEventListener(Event.ADDED, onAddedToDisplayList);
 	}
@@ -79,10 +84,12 @@ class TabWindow extends flixel.system.debug.Window
 		_content.visible = status;
 		_shadow.visible = status;
 		_background.visible = status;
-		_title.border = status;
-		_title.borderColor = flixel.system.debug.Window.BG_COLOR;
-		_title.background = status;
-		_title.backgroundColor = flixel.system.debug.Window.BG_COLOR;
+		_activeTabHighlight.visible = status;
+		_activeTabHighlight.scaleX = getTitleWidth();
+		_activeTabHighlight.scaleY = HEADER_HEIGHT;
+
+		if (_icon != null)
+			_icon.alpha = status ? 1 : 0.3;
 
 		if (_resizable)
 			_handle.visible = status;
@@ -124,7 +131,7 @@ class TabWindow extends flixel.system.debug.Window
 
 		while (sibling != null)
 		{
-			if (mouseX >= currentX && mouseX <= (currentX + sibling.getTitleWidth()))
+			if (mouseY <= _header.height && mouseX >= currentX && mouseX <= (currentX + sibling.getTitleWidth()))
 			{
 				found = true;
 				break;
@@ -220,7 +227,15 @@ class TabWindow extends flixel.system.debug.Window
 	{
 		if (hasSiblings())
 		{
-			_title.x = calculateTitleOffsetFromSiblings();
+			var offsetX = calculateTitleOffsetFromSiblings();
+			if (_icon != null)
+			{
+				_icon.x = offsetX + 5;
+				_title.x = _icon.x + _icon.width + 2;
+			}
+			else
+				_title.x = offsetX;
+			_activeTabHighlight.x = offsetX;
 			_header.visible = shouldDisplayHeaderBar();
 
 			var minWidth = Std.int(getMinWidthHouseAllSiblingsTitles());
@@ -302,7 +317,7 @@ class TabWindow extends flixel.system.debug.Window
 
 	public function getTitleWidth():Float
 	{
-		return _title.textWidth + 10;
+		return (_icon != null ? _icon.width + 2 : 0) + _title.textWidth + 15;
 	}
 
 	public function hasSiblings():Bool
