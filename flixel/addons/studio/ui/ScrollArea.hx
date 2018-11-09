@@ -22,6 +22,7 @@ class ScrollArea extends Sprite
 	public static var SCROLL_HANDLE_HEIGHT:Int = 20;
 	
 	public var scrollSpeed:Float = 15.0;
+	public var scrollYPadding:PaddingInfo;
 	
 	var _hitArea:TextField;
 	var _content:Sprite;
@@ -37,6 +38,8 @@ class ScrollArea extends Sprite
 	{
 		super();
 
+		scrollYPadding = new PaddingInfo();
+
 		// Ugly hack to ensure the scroll area can capture mouse events even when its
 		// content is transparent or contains "holes".
 		_hitArea = new TextField();
@@ -47,7 +50,7 @@ class ScrollArea extends Sprite
 		addChild(_content);
 
 		_scrollHandleY = createScrollHandle(SCROLL_HANDLE_WIDTH, SCROLL_HANDLE_HEIGHT);
-		_scrollHandleY.y = 0;
+		_scrollHandleY.y = scrollYPadding.top;
 		_scrollHandleY.addEventListener(MouseEvent.MOUSE_DOWN, onScrollHandleMouseEvent);
 		addChild(_scrollHandleY);
 
@@ -103,14 +106,14 @@ class ScrollArea extends Sprite
 			return;
 
 		var point = localToGlobal(new Point(_scrollMask.x, _scrollMask.y));
-		_scrollHandleY.y = FlxMath.bound(e.stageY - point.y, 0, _scrollMask.height);
+		_scrollHandleY.y = FlxMath.bound(e.stageY - point.y, scrollYPadding.top, _scrollMask.height - scrollYPadding.bottom);
 		var handleProgress = calculateScrollHandleYProgress();
 		setScrollProgressY(handleProgress);
 	}
 
 	function calculateScrollHandleYProgress():Float
 	{
-		var progress = _scrollHandleY.y / (_scrollMask.height - _scrollHandleY.height);
+		var progress = _scrollHandleY.y / (_scrollMask.height - _scrollHandleY.height - scrollYPadding.top - scrollYPadding.bottom);
 		progress = FlxMath.bound(progress, 0, 1);
 		return progress;
 	}
@@ -194,24 +197,12 @@ class ScrollArea extends Sprite
 
 	function ensureScrollHandleBoundaries():Void
 	{
-		if (_scrollHandleY.y <= 0)
-			_scrollHandleY.y = 0;
+		if (_scrollHandleY.y <= scrollYPadding.top)
+			_scrollHandleY.y = scrollYPadding.top;
 		
-		if (_scrollHandleY.y + _scrollHandleY.height >= _scrollMask.height)
-			_scrollHandleY.y =  _scrollMask.height - _scrollHandleY.height;
+		if (_scrollHandleY.y + _scrollHandleY.height >= _scrollMask.height - scrollYPadding.bottom)
+			_scrollHandleY.y =  _scrollMask.height - _scrollHandleY.height - scrollYPadding.bottom;
 	}	
-
-	function getScrollingProgress():Float
-	{
-		var totalNonVisibleArea = Math.max(0, _content.height - _scrollMask.height);
-		var currentNonVisibleArea = Math.max(0, (_content.y + _content.height) - _scrollMask.height);
-
-		if (totalNonVisibleArea <= 0)
-			return 0;
-
-		var progress = Math.max(0, 1 - currentNonVisibleArea / totalNonVisibleArea);
-		return progress;
-	}
 
 	/**
 	 * Check if the size of the scroll area and the content it is housing requires scroll.
@@ -288,6 +279,7 @@ class ScrollArea extends Sprite
 		_content = null;
 		_scrollMask = null;
 		_scrollHandleY = null;
+		scrollYPadding = null;
 		removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 		removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 		removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);

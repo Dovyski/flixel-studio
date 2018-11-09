@@ -60,6 +60,7 @@ class TabWindow extends flixel.system.debug.Window
 		_content.x = 0;
 		_content.y = HEADER_HEIGHT;
 		_content.setScrollable(true);
+		_content.scrollYPadding.bottom = _handle.height;
 		addChild(_content);
 
 		addEventListener(Event.ADDED, onAddedToDisplayList);
