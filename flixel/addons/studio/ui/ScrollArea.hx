@@ -12,7 +12,7 @@ import flash.geom.Point;
 import flixel.math.FlxMath;
 
 /**
- * TODO: add docs
+ * Provide a containter whose content can be scrolled.
  * 
  * @author Fernando Bevilacqua <dovyski@gmail.com>
  */
@@ -31,15 +31,7 @@ class ScrollArea extends Sprite
 	var _usingScrollHandleY:Bool;
 	
 	/**
-	 * Creates a new window object.  This Flash-based class is mainly (only?) used by FlxDebugger.
-	 * 
-	 * @param   Title       The name of the window, displayed in the header bar.
-	 * @param   Icon	    The icon to use for the window header.
-	 * @param   Width       The initial width of the window.
-	 * @param   Height      The initial height of the window.
-	 * @param   Resizable   Whether you can change the size of the window with a drag handle.
-	 * @param   Bounds      A rectangle indicating the valid screen area for the window.
-	 * @param   Closable    Whether this window has a close button that removes the window.
+	 * Creates a new object.
 	 */
 	public function new()
 	{
@@ -140,6 +132,9 @@ class ScrollArea extends Sprite
 			stopScrolling();
 	}
 
+	/**
+	 * Interrup any scrolling action that is currently happening.
+	 */
 	public function stopScrolling():Void
 	{
 		_usingScrollHandleY = false;
@@ -171,6 +166,11 @@ class ScrollArea extends Sprite
 		setScrollProgressY(handleProgress);
 	}
 
+	/**
+	 * Adjust the position of the vertical scroll handle based on a progress measurement.
+	 * 
+	 * @param progress Float between the interval `[0,1]` indicating the progress of the handle. A value of `0.5` indicates the middle of the scroll area.
+	 */
 	public function setScrollProgressY(progress:Float):Void
 	{
 		var totalNonVisibleArea = Math.max(_content.height - _scrollMask.height, 0);
@@ -213,11 +213,22 @@ class ScrollArea extends Sprite
 		return progress;
 	}
 
+	/**
+	 * Check if the size of the scroll area and the content it is housing requires scroll.
+	 * 
+	 * @return Bool	`true` if the scroll area needs a scroll handle to display its content.
+	 */
 	public function needsScrollY():Bool
 	{
 		return _content.height > _scrollMask.height;
 	}
 
+	/**
+	 * Resize the scroll area.
+	 * 
+	 * @param width    The value for the scroll area width.
+	 * @param height   The vlaue for the scroll area height.
+	 */
 	public function resize(width:Float, height:Float):Void
 	{
 		_hitArea.width = width;
@@ -234,12 +245,26 @@ class ScrollArea extends Sprite
 		ensureScrollHandleBoundaries();
 	}
 
+	/**
+	 * Add content to the scroll area.
+	 * 
+	 * @param child            Element to be added as content.
+	 * @return DisplayObject   Reference to the added element.
+	 */
 	public function addContent(child:DisplayObject):DisplayObject
 	{
 		var element = _content.addChild(child);
 		return element;
 	}
 
+	/**
+	 * Control if this scroll area has scrolling capabilities enabled or not.
+	 * When scrolling capabilities are disabled, the scroll area will not show 
+	 * any scroll bars nor allow any content scrolling. By default, any scroll
+	 * area has scrolling capabilibites enabled.
+	 * 
+	 * @param status `true` if the scroll area should scroll its content, or `false` otherwise, e.g. temporarily disable scrolling.
+	 */
 	public function setScrollable(status:Bool):Void
 	{
 		_usingScrollHandleY = false;

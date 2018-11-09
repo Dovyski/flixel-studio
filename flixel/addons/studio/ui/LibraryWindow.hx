@@ -23,7 +23,7 @@ class GraphicLibraryWindowIcon extends BitmapData {}
  * 
  * @author Fernando Bevilacqua <dovyski@gmail.com>
  */
-class LibraryWindow extends StackableWindow
+class LibraryWindow extends TabWindow
 {
 	private static inline var GUTTER = 4;
 

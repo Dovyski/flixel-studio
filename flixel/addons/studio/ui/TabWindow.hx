@@ -11,16 +11,25 @@ import flash.geom.Point;
 import flixel.math.FlxMath;
 
 /**
- * TODO: add docs
+ * A window that can be attached to another window to create
+ * content separated by tabs. When attached, each window works
+ * as a tab, several windows can occupy the same space on the
+ * screen while only one of them is actively displaying content.
+ *
+ * Internally, the `TabWindow` class works without a centralized
+ * window manager. Instead each window has a referece to other
+ * sibling windows (left and right siblings, respectively).
+ * When attached, the windows become siblings in a chain, which
+ * is used to propagate important events, e.g. resize.
  * 
  * @author Fernando Bevilacqua <dovyski@gmail.com>
  */
-class StackableWindow extends flixel.system.debug.Window
+class TabWindow extends flixel.system.debug.Window
 {
 	public static var HEADER_HEIGHT:Int = 15;
 	
-	var _siblingLeft:StackableWindow;
-	var _siblingRight:StackableWindow;
+	var _siblingLeft:TabWindow;
+	var _siblingRight:TabWindow;
 	var _content:ScrollArea;
 	
 	/**
@@ -30,15 +39,15 @@ class StackableWindow extends flixel.system.debug.Window
 	var _activeTab:Bool;
 	
 	/**
-	 * Creates a new window object.  This Flash-based class is mainly (only?) used by FlxDebugger.
+	 * Creates a new tabbed window object.
 	 * 
-	 * @param   Title       The name of the window, displayed in the header bar.
-	 * @param   Icon	    The icon to use for the window header.
-	 * @param   Width       The initial width of the window.
-	 * @param   Height      The initial height of the window.
-	 * @param   Resizable   Whether you can change the size of the window with a drag handle.
-	 * @param   Bounds      A rectangle indicating the valid screen area for the window.
-	 * @param   Closable    Whether this window has a close button that removes the window.
+	 * @param   title       The name of the window, displayed in the header bar.
+	 * @param   icon	    The icon to use for the window header.
+	 * @param   width       The initial width of the window.
+	 * @param   height      The initial height of the window.
+	 * @param   resizable   Whether you can change the size of the window with a drag handle.
+	 * @param   bounds      A rectangle indicating the valid screen area for the window.
+	 * @param   closable    Whether this window has a close button that removes the window.
 	 */
 	public function new(title:String, ?icon:BitmapData, width:Float = 0, height:Float = 0, resizable:Bool = true,
 		?bounds:Rectangle, closable:Bool = false)
@@ -136,7 +145,7 @@ class StackableWindow extends flixel.system.debug.Window
 			_siblingLeft.updateBasedOnSibling(this, false, activeSiblingIndex);
 	}
 
-	function updateBasedOnSibling(commander:StackableWindow, toTheRight:Bool = true, activeSiblingIndex:Int = -1):Void
+	function updateBasedOnSibling(commander:TabWindow, toTheRight:Bool = true, activeSiblingIndex:Int = -1):Void
 	{
 		// Decide the next sibling based on the informed flow,
 		// i.e. to the right or to the left.
@@ -267,6 +276,13 @@ class StackableWindow extends flixel.system.debug.Window
 		return position;
 	}
 
+	/**
+	 * Add an element to the scrollable area of the window. If you do not want your
+	 * element to be scrollable within the window, use `addChild()` instead. 
+	 * 
+	 * @param child            Element to be added to the window as content.
+	 * @return DisplayObject   Reference to the added element.
+	 */
 	public function addContent(child:DisplayObject):DisplayObject
 	{
 		var element = _content.addContent(child);
@@ -293,7 +309,14 @@ class StackableWindow extends flixel.system.debug.Window
 		return _siblingLeft != null || _siblingRight != null;
 	}
 
-	public function attachTo(target:StackableWindow):Void
+	/**
+	 * Attach this window to another window. When attached, the windows will
+	 * occupy the same space on the screen and will display their content as
+	 * tabs, i.e. only one window will be display content at the time.
+	 * 
+	 * @param   target   Window to be attached to.
+	 */
+	public function attachTo(target:TabWindow):Void
 	{
 		if (target == null)
 			throw "target window to be attached to must not be null";
@@ -315,9 +338,15 @@ class StackableWindow extends flixel.system.debug.Window
 		// TODO: implement this
 	}
 
-	public function getRightMostSibling():StackableWindow
+	/**
+	 * When the window is attached to other windows, return the
+	 * window that is located at the start (far right) of the chain of windows.
+	 * 
+	 * @return TabWindow reference to the first window in the chain (right most one). If the windows is not attached to other windows, this method returns a reference to the window itself.
+	 */
+	public function getRightMostSibling():TabWindow
 	{
-		var sibling:StackableWindow = _siblingRight;
+		var sibling:TabWindow = _siblingRight;
 		while (sibling != null)
 		{
 			if (sibling._siblingRight == null)
@@ -328,9 +357,15 @@ class StackableWindow extends flixel.system.debug.Window
 		return sibling == null ? this : sibling;
 	}
 
-	public function getLeftMostSibling():StackableWindow
+	/**
+	 * When the window is attached to other windows, return the
+	 * window that is located at the start (far right) of the chain of windows.
+	 * 
+	 * @return TabWindow reference to the last window in the chain (left most one). If the windows is not attached to other windows, this method returns a reference to the window itself.
+	 */
+	public function getLeftMostSibling():TabWindow
 	{
-		var sibling:StackableWindow = _siblingLeft;
+		var sibling:TabWindow = _siblingLeft;
 		while (sibling != null)
 		{
 			if (sibling._siblingLeft == null)

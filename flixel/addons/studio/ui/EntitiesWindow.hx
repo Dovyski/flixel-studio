@@ -39,7 +39,7 @@ class GraphicDotIcon extends BitmapData {}
  * 
  * @author Fernando Bevilacqua <dovyski@gmail.com>
  */
-class EntitiesWindow extends StackableWindow
+class EntitiesWindow extends TabWindow
 {
 	private static inline var LINE_HEIGHT:Int = 15;
 	private static inline var GUTTER = 4;
