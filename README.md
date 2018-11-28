@@ -4,7 +4,7 @@
 
 ## About
 
-> **NOTICE: this project is in early days of development! Things are expected to change and/or break. Documentation and features are still very rough, but they will eventually mature in the near future.**
+> **NOTICE: this project is in early days of development! Things are expected to change and/or break. Documentation and features are still very rough, but they will eventually mature in the near future. Check the [ROADMAP](ROADMAP.md) to have an idea of how the project will evolve.**
 
 Flixel Studio is an embeddable, in-game editor for [HaxeFlixel](https://haxeflixel.com). Simply put, when enabled in a project, Flixel Studio will turn the existing Flixel debugger into a full-featured editor. You can then organize game elements using layers, edit tilemaps, change properties of game objects, among many more things.
 
@@ -29,7 +29,7 @@ Get the latest development version from Github:
 haxelib git flixel-studio https://github.com/Dovyski/flixel-studio.git
 ```
 
-___NOTE: in the future, you will be able to install `flixel-studio` from `haxelib` repository.___
+___NOTE: in the future, you will be able to install `flixel-studio` from the `haxelib` repository.___
 
 ### 2. Add the `flixel-studio` lib to your project
 
@@ -101,7 +101,7 @@ class PlayState extends FlxState
 }
 ```
 
-> **IMPORTANT: currently `flixel-studio` will not compile with any unmodified version of HaxeFlixel. HaxeFlixel's `addTool()` method in the debugger is currently private, so you need to make it public by changing HaxeFlixel code yourself. A pull request to fix that will be sent to the HaxeFlixel repository.**
+> **IMPORTANT: currently `flixel-studio` will only compile with the development version of HaxeFlixel (`version > 4.5.1`). Follow the inscructions on how to install HaxeFlixel development version [here](http://haxeflixel.com/documentation/install-development-flixel/).**
 
 ### 3. Usage (in-game editor)
 
@@ -113,7 +113,7 @@ When Flixel Studio is enabled in a project, the interaction's panel of tools on 
 
 The development process is a little bit rough right now. It's basically me coding and changing things a lot, documenting things very superficially along the way. At some point, the APIs will stabilize and it will be a lot easier to join the party.
 
-If you want to help now, you can take flixel-studio for a ride and send me your feedback, or suggest a feature, [report a problem]((https://github.com/Dovyski/Codebot/issues/new)), or even send a pull request.
+If you want to help now, you can take flixel-studio for a ride and send me your feedback, or suggest a feature, [report a problem]((https://github.com/Dovyski/Codebot/issues/new)), or even send a pull request. Check the [ROADMAP](ROADMAP.md) to have an idea of how the project should evolve.
 
 ## License
 
