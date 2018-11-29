@@ -7,6 +7,8 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxMath;
 import flixel.system.debug.interaction.Interaction;
 import flixel.system.debug.interaction.tools.Tool;
+import flixel.system.debug.Tooltip;
+import flixel.addons.studio.utils.Formtatter;
 
 /**
  * Allow the scale factor fo the main camera to be controlled, i.e. zoom in/out.
@@ -15,7 +17,7 @@ import flixel.system.debug.interaction.tools.Tool;
  */
 class Zoom extends Tool
 {		
-	public static inline var ZOOM_CHANGE_STEP:Float = 0.05;`
+	public static inline var ZOOM_CHANGE_STEP:Float = 0.02;
 	
 	var _tooltip:TooltipOverlay;	
 	
@@ -50,11 +52,19 @@ class Zoom extends Tool
 		change = zoomIn ? ZOOM_CHANGE_STEP : -ZOOM_CHANGE_STEP;
 		FlxG.camera.setScale(FlxG.camera.scaleX + change, FlxG.camera.scaleY + change);
 
+		showOverlayTooltip();
+	}
+
+	function showOverlayTooltip():Void
+	{
+		if (!_tooltip.visible)
+			_tooltip.setVisible(true);
+
 		_tooltip.x = FlxG.camera.scroll.x;
-		_tooltip.y = FlxG.camera.scroll.y;
+		_tooltip.y = FlxG.camera.scroll.y - FlxG.height * 0.7;
 		_tooltip.setText(
-			"scaleX: " + FlxG.camera.scaleX + "\n" +
-			"scaleX: " + FlxG.camera.scaleY
+			"scaleX: " + Formatter.prettifyFloat(FlxG.camera.scaleX) + "\n" +
+			"scaleY: " + Formatter.prettifyFloat(FlxG.camera.scaleY)
 		);
 	}
 }
