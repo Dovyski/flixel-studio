@@ -188,15 +188,22 @@ class LibraryWindow extends TabWindow
 
 	function removeExistingItems():Void
 	{
+		if (_rowsContainer.numChildren == 0)
+			return;
+
 		while (_rowsContainer.numChildren > 0)
 		{
 			var item:LibraryWindowRow = cast _rowsContainer.getChildAt(0);
 			item.destroy();
+			_rowsContainer.removeChildAt(0);
 		}
 	}
 
 	function updateItemsPosition():Void
 	{
+		if (_rowsContainer.numChildren == 0)
+			return;
+
 		for (i in 0..._rowsContainer.numChildren)
 		{
 			var item:LibraryWindowRow = cast _rowsContainer.getChildAt(i);

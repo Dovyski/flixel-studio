@@ -192,5 +192,14 @@ class FlxStudio extends flixel.system.debug.Window
 		{
 			_properties.setTarget(cast entity.reference);
 		}
-	}	
+	}
+
+	public function addLibraryItem(className:String, icon:Class<BitmapData> = null, name:String = "", params:Array<Dynamic> = null, tags:Array<String> = null):LibraryItem
+	{
+		var item:LibraryItem = new LibraryItem(className, icon, name, params, tags);
+		_library.add(item);
+		_libraryWindow.refresh();
+
+		return item;
+	}
 }

@@ -1,5 +1,6 @@
 package flixel.addons.studio.core;
 
+import flixel.system.FlxAssets.FlxGraphicAsset;
 import openfl.display.BitmapData;
 import openfl.display.Bitmap;
 
@@ -21,25 +22,37 @@ class LibraryItem
 	public var params(default, null):Array<Dynamic>;
 	public var tags(default, null):Array<Dynamic>;
 
-	public function new(className:String, name:String = "", icon:Class<BitmapData> = null, params:Array<Dynamic> = null, tags:Array<String> = null)
+	public function new(className:String, icon:Class<BitmapData> = null, name:String = "", params:Array<Dynamic> = null, tags:Array<String> = null)
 	{
 		if (className == null || className == "")
 			throw "Invalid class name for library item.";
 
 		this.className = className;
 		this.name = name;
-		this.icon = createIcon(icon);
 		this.params = params == null ? [] : params;
 		this.tags = tags == null ? [] : tags;
+
+		setIconFromBitmapDataClass(icon);
 	}
 
-	function createIcon(iconBitmapDataClass:Class<BitmapData>):Bitmap
+	public function setIconFromBitmapDataClass(iconClass:Class<BitmapData>):Bitmap
 	{
-		var whichClass:Class<BitmapData> = iconBitmapDataClass == null ? GraphicLibraryItemDefaultIcon : iconBitmapDataClass;
+		var whichClass:Class<BitmapData> = iconClass == null ? GraphicLibraryItemDefaultIcon : iconClass;
 		var data:BitmapData = Type.createInstance(whichClass, [0, 0]);
 		var icon:Bitmap = new Bitmap(data);
 
-		return icon;	
+		this.icon = icon;
+		return this.icon;
+	}
+
+	public function setIconFromFlxGraphicsAsset(graphic:FlxGraphicAsset, animated:Bool = false, width:Int = 0, height:Int = 0):Bitmap
+	{
+		var sprite:FlxSprite = new FlxSprite();
+		sprite.loadGraphic(graphic, animated, width, height);
+		var icon:Bitmap = new Bitmap(sprite.framePixels);
+		
+		this.icon = icon;
+		return this.icon;
 	}
 	#end
 }
