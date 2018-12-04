@@ -134,6 +134,7 @@ class FlxStudio extends flixel.system.debug.Window
 	{
 		FlxG.game.debugger.interaction.addTool(new Tile());
 		FlxG.game.debugger.interaction.addTool(new Hand());
+		FlxG.game.debugger.interaction.addTool(new Zoom());
 	}
 
 	/**
