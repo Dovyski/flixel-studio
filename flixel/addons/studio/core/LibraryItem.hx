@@ -18,41 +18,53 @@ class LibraryItem
 	#if FLX_DEBUG
 	public var className(default, null):String;
 	public var name(default, null):String;
-	public var icon(default, null):Bitmap;
+	public var icon(default, null):LibraryItemIcon;
 	public var params(default, null):Array<Dynamic>;
 	public var tags(default, null):Array<Dynamic>;
 
-	public function new(className:String, icon:Class<BitmapData> = null, name:String = "", params:Array<Dynamic> = null, tags:Array<String> = null)
+	public function new(className:String, icon:LibraryItemIcon = null, name:String = "", params:Array<Dynamic> = null, tags:Array<String> = null)
 	{
 		if (className == null || className == "")
 			throw "Invalid class name for library item.";
 
 		this.className = className;
+		this.icon = icon == null ? createDefaultIcon() : icon;
 		this.name = name;
 		this.params = params == null ? [] : params;
 		this.tags = tags == null ? [] : tags;
-
-		setIconFromBitmapDataClass(icon);
 	}
 
-	public function setIconFromBitmapDataClass(iconClass:Class<BitmapData>):Bitmap
+	public static function createIconFromBitmapDataClass(iconClass:Class<BitmapData>):LibraryItemIcon
 	{
-		var whichClass:Class<BitmapData> = iconClass == null ? GraphicLibraryItemDefaultIcon : iconClass;
+		var whichClass:Class<BitmapData> = iconClass;
 		var data:BitmapData = Type.createInstance(whichClass, [0, 0]);
-		var icon:Bitmap = new Bitmap(data);
+		var icon:LibraryItemIcon = new LibraryItemIcon(data);
 
-		this.icon = icon;
-		return this.icon;
+		return icon;
 	}
 
-	public function setIconFromFlxGraphicsAsset(graphic:FlxGraphicAsset, animated:Bool = false, width:Int = 0, height:Int = 0):Bitmap
+	public static function createIconFromFlxGraphicAsset(graphic:FlxGraphicAsset, animated:Bool = false, width:Int = 0, height:Int = 0):LibraryItemIcon
 	{
 		var sprite:FlxSprite = new FlxSprite();
 		sprite.loadGraphic(graphic, animated, width, height);
-		var icon:Bitmap = new Bitmap(sprite.framePixels);
+		var icon:LibraryItemIcon = new LibraryItemIcon(sprite.framePixels);
 		
-		this.icon = icon;
-		return this.icon;
+		return icon;
+	}
+
+	public static function createDefaultIcon():LibraryItemIcon
+	{
+		return createIconFromBitmapDataClass(GraphicLibraryItemDefaultIcon);
 	}
 	#end
+}
+
+class LibraryItemIcon
+{
+	public var bitmapData(default, null):BitmapData;
+
+	public function new(data:BitmapData)
+	{
+		this.bitmapData = data;
+	}
 }

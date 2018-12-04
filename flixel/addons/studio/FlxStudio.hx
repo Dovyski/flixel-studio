@@ -26,6 +26,7 @@ import openfl.Assets;
 import flixel.addons.studio.tools.*;
 import flixel.addons.studio.core.*;
 import flixel.addons.studio.core.Entities.EntityType;
+import flixel.addons.studio.core.LibraryItem.LibraryItemIcon;
 import flixel.addons.studio.ui.*;
 
 /**
@@ -194,7 +195,7 @@ class FlxStudio extends flixel.system.debug.Window
 		}
 	}
 
-	public function addLibraryItem(className:String, icon:Class<BitmapData> = null, name:String = "", params:Array<Dynamic> = null, tags:Array<String> = null):LibraryItem
+	public function addLibraryItem(className:String, icon:LibraryItemIcon = null, name:String = "", params:Array<Dynamic> = null, tags:Array<String> = null):LibraryItem
 	{
 		var item:LibraryItem = new LibraryItem(className, icon, name, params, tags);
 		_library.add(item);
