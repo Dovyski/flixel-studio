@@ -101,7 +101,10 @@ class LibraryWindowRow extends Sprite implements IFlxDestroyable
 
 	function createIcon():Bitmap
 	{
-		var icon:Bitmap = new Bitmap(item.icon.bitmapData);
+		var iconData:BitmapData = item.icon != null ? item.icon.bitmapData : LibraryIcon.create().bitmapData;
+		var icon:Bitmap = new Bitmap(iconData);
+
+		// TODO: ensure icon has the proper width/height.
 
 		icon.x = 0;
 		icon.y = 0;

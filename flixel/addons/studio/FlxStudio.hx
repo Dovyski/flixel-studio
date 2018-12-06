@@ -26,7 +26,6 @@ import openfl.Assets;
 import flixel.addons.studio.tools.*;
 import flixel.addons.studio.core.*;
 import flixel.addons.studio.core.Entities.EntityType;
-import flixel.addons.studio.core.LibraryItem.LibraryItemIcon;
 import flixel.addons.studio.ui.*;
 
 /**
@@ -39,9 +38,13 @@ class FlxStudio extends flixel.system.debug.Window
 {	
 	public static var instance:FlxStudio;
 
+	/**
+	 * TODO: add docs
+	 */
+	public var library(default, null):Library;	
+
 	var _properties:Properties;
 	var _entities:Entities;
-	var _library:Library;
 	var _entitiesWindow:EntitiesWindow;	
 	var _libraryWindow:LibraryWindow;	
 
@@ -52,6 +55,7 @@ class FlxStudio extends flixel.system.debug.Window
 	public var entitiesVisibilityButtonClicked:FlxSignal = new FlxSignal();
 	public var entitiesLockButtonClicked:FlxSignal = new FlxSignal();
 	public var libraryItemDraggedIntoScreen:FlxTypedSignal<LibraryItem->Void> = new FlxTypedSignal();	
+	public var itemAddedToLibrary:FlxTypedSignal<LibraryItem->Void> = new FlxTypedSignal();	
 
 	// TODO: choose a good name for this
 	public static function start():Void
@@ -80,7 +84,7 @@ class FlxStudio extends flixel.system.debug.Window
 	{
 		_properties = new Properties();
 		_entities = new Entities();
-		_library = new Library();
+		library = new Library();
 
 		addInteractionTools();
 		initSignals();
@@ -119,7 +123,7 @@ class FlxStudio extends flixel.system.debug.Window
 	function initUI():Void 
 	{
 		_entitiesWindow = new EntitiesWindow(_entities);
-		_libraryWindow = new LibraryWindow(_library);
+		_libraryWindow = new LibraryWindow(library);
 
 		_entitiesWindow.refresh();
 		_libraryWindow.refresh();
@@ -145,6 +149,7 @@ class FlxStudio extends flixel.system.debug.Window
 	{
 		entityRowSelected.add(onEntityRowSelected);
 		libraryItemDraggedIntoScreen.add(onLibraryItemDraggedIntoScreen);
+		itemAddedToLibrary.add(onItemAddedToLibrary);
 	}
 
 	function onLibraryItemDraggedIntoScreen(item:LibraryItem):Void
@@ -160,7 +165,12 @@ class FlxStudio extends flixel.system.debug.Window
 		
 		// TODO: add obj to the right layer
 		FlxG.state.add(obj);
-	}	
+	}
+
+	function onItemAddedToLibrary(item:LibraryItem):Void
+	{
+		_libraryWindow.refresh();
+	}
 
 	function selectInteractionTool(className:Class<Tool>):Void
 	{
@@ -193,14 +203,5 @@ class FlxStudio extends flixel.system.debug.Window
 		{
 			_properties.setTarget(cast entity.reference);
 		}
-	}
-
-	public function addLibraryItem(className:String, icon:LibraryItemIcon = null, name:String = "", params:Array<Dynamic> = null, tags:Array<String> = null):LibraryItem
-	{
-		var item:LibraryItem = new LibraryItem(className, icon, name, params, tags);
-		_library.add(item);
-		_libraryWindow.refresh();
-
-		return item;
 	}
 }
