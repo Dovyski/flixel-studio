@@ -79,7 +79,7 @@ class FlxStudio extends flixel.system.debug.Window
 		// Initialize everything only after the game has been started, that way
 		// we have access to all element added during the game's `create()` call.
 		// It allows developers to call `FlxStudio.start()` at any point.
-		FlxG.signals.gameStarted.add(bootstrap);
+		FlxG.signals.postGameStart.addOnce(bootstrap);
 	}
 
 	/**
