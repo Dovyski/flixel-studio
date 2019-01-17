@@ -28,6 +28,11 @@ import flixel.addons.studio.core.*;
 import flixel.addons.studio.core.Entities.EntityType;
 import flixel.addons.studio.ui.*;
 
+@:bitmap("assets/images/icons/library.png")
+class LibraryWindowToggle extends BitmapData {}
+@:bitmap("assets/images/icons/Entities.png")
+class EntitiesWindowToggle extends BitmapData {}
+
 /**
  * TODO: add docs
  * 
@@ -128,8 +133,10 @@ class FlxStudio extends flixel.system.debug.Window
 		_entitiesWindow.refresh();
 		_libraryWindow.refresh();
 		
-		FlxG.game.debugger.addWindow(_entitiesWindow);	
-		FlxG.game.debugger.addWindow(_libraryWindow);	
+		FlxG.game.debugger.addWindow(_entitiesWindow);
+		FlxG.game.debugger.addWindow(_libraryWindow);
+		FlxG.game.debugger.addWindowToggleButton(_entitiesWindow, EntitiesWindowToggle);
+		FlxG.game.debugger.addWindowToggleButton(_libraryWindow, LibraryWindowToggle);
 	}
 
 	/**
