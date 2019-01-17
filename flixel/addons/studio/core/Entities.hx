@@ -25,6 +25,11 @@ class Entities
 	#if FLX_DEBUG
 	public function new()
 	{
+		parseCurrentState();
+	}
+	
+	public function parseCurrentState():Void
+	{
 		_list = findItems(FlxG.state.members);
 		
 		// Try to apply the names of the properties of the currently active state

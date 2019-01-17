@@ -97,6 +97,7 @@ class FlxStudio extends flixel.system.debug.Window
 
 		FlxG.game.debugger.addWindow(this);
 		setExitHandler(onExit);
+		FlxG.signals.postStateSwitch.add(onStateSwitch);
 	}
 
 	override public function update():Void
@@ -104,6 +105,12 @@ class FlxStudio extends flixel.system.debug.Window
 		super.update();
 		_properties.update();
 		_entities.update();
+	}
+	
+	function onStateSwitch():Void
+	{
+		_entities.parseCurrentState();
+		_entitiesWindow.refresh();
 	}
 
 	function onExit():Void
