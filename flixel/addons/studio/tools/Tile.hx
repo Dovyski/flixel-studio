@@ -52,8 +52,8 @@ class Tile extends Tool
 		properties = new TilemapWindow(this, 2, 150);
 		palette = new TileSelectionWindow(this, properties.x, 250);
 		tileHightligh = new FlxSprite(); // TODO: replace this with a Sprite.		
-		FlxG.addChildBelowMouse(properties);
-		FlxG.addChildBelowMouse(palette);
+		FlxG.game.debugger.addChild(properties);
+		FlxG.game.debugger.addChild(palette);
 		
 		brain.addTool(new Editor(this));
 		
