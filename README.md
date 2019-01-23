@@ -62,7 +62,7 @@ Usually libs are listed in the libraries section of the `Project.xml` file, whic
 
 After installing and adding `flixel-studio` to your project, you are ready to start using it.
 
-Open any class that describes a state of your game, e.g. `PlayState`. In the `create()` method, add the following line (no matter the place):
+Open the class that describes an initial state of your game, i.e. the one the name of which is passed into `new FlxGame()`. In the `create()` method of that class, add the following line (no matter the place):
 
 ```haxe
 flixel.addons.studio.FlxStudio.start();
