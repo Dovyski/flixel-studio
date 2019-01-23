@@ -65,7 +65,8 @@ class FlxStudio extends flixel.system.debug.Window
 	// TODO: choose a good name for this
 	public static function start():Void
 	{
-		FlxStudio.instance = new FlxStudio();
+		if (FlxStudio.instance == null)
+			FlxStudio.instance = new FlxStudio();
 	}
 
 	/**
