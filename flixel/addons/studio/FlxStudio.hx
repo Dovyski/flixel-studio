@@ -76,7 +76,6 @@ class FlxStudio extends flixel.system.debug.Window
 	{
 		super("FlxStudio");
 		visible = false;
-		
 		FlxStudio.instance = this;
 		
 		// Initialize everything only after the game has been started, that way
