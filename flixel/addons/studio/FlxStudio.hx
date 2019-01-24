@@ -63,23 +63,29 @@ class FlxStudio extends flixel.system.debug.Window
 	public var itemAddedToLibrary:FlxTypedSignal<LibraryItem->Void> = new FlxTypedSignal();	
 
 	// TODO: choose a good name for this
-	public static function start():Void
+	public static function create():Void
 	{
-		FlxStudio.instance = new FlxStudio();
+		if (instance == null)
+			new FlxStudio();
 	}
 
 	/**
 	 * TODO: add docs
 	 */
-	public function new()
+	function new()
 	{
 		super("FlxStudio");
 		visible = false;
-
+		
+		FlxStudio.instance = this;
+		
 		// Initialize everything only after the game has been started, that way
 		// we have access to all element added during the game's `create()` call.
 		// It allows developers to call `FlxStudio.start()` at any point.
-		FlxG.signals.postGameStart.addOnce(bootstrap);
+		if (FlxG.game != null && FlxG.game.debugger != null)
+			bootstrap();
+		else
+			FlxG.signals.postGameStart.addOnce(bootstrap);
 	}
 
 	/**
@@ -93,7 +99,7 @@ class FlxStudio extends flixel.system.debug.Window
 
 		addInteractionTools();
 		initSignals();
-		initUI();		
+		initUI();
 
 		FlxG.game.debugger.addWindow(this);
 		setExitHandler(onExit);
