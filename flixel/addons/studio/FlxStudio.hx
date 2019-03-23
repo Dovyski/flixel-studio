@@ -52,6 +52,7 @@ class FlxStudio extends flixel.system.debug.Window
 	var _entities:Entities;
 	var _entitiesWindow:EntitiesWindow;	
 	var _libraryWindow:LibraryWindow;	
+	var _workTray:WorkTray;
 
 	public var entityRowSelected:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
 	public var entityVisibilityButtonClicked:FlxTypedSignal<EntityRow->Void> = new FlxTypedSignal();
@@ -141,14 +142,22 @@ class FlxStudio extends flixel.system.debug.Window
 	{
 		_entitiesWindow = new EntitiesWindow(_entities);
 		_libraryWindow = new LibraryWindow(library);
+		_workTray = new WorkTray();
 
 		_entitiesWindow.refresh();
 		_libraryWindow.refresh();
 		
 		FlxG.game.debugger.addWindow(_entitiesWindow);
 		FlxG.game.debugger.addWindow(_libraryWindow);
-		FlxG.game.debugger.addWindowToggleButton(_entitiesWindow, EntitiesWindowToggle);
-		FlxG.game.debugger.addWindowToggleButton(_libraryWindow, LibraryWindowToggle);
+		
+		// the _workTray is a window that is not exactly a window. It is always
+		// located below Flixe debugger's top toolbar and it houses all buttons
+		// of the Flixel studio itself. 
+		FlxG.game.debugger.addWindow(_workTray);
+		
+		// Add all windows/buttons available in the studio to the work tray
+		_workTray.addWindowToggleButton(_entitiesWindow, EntitiesWindowToggle);
+		_workTray.addWindowToggleButton(_libraryWindow, LibraryWindowToggle);
 	}
 
 	/**
