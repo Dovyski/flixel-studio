@@ -60,7 +60,9 @@ Usually libs are listed in the libraries section of the `Project.xml` file, whic
 
 ### 3. Usage (code)
 
-After installing and adding `flixel-studio` to your project, you are ready to start using it. To add the FlxStudio windows to the FlxDebugger, call `flixel.addons.studio.FlxStudio.create()` anytime after the FlxGame is created, , e.g. in your Document class or in your FlxState's create override.
+After installing and adding `flixel-studio` to your project, you are ready to start using it. To make Flixel Studio available for use in your game, call `flixel.addons.studio.FlxStudio.create()` anywhere in your code, e.g. in your Document class or in your `FlxState`'s `create()` override.
+
+Below is an example of a call in the game's `create()` override:
 
 ```haxe
 override public function create():Void
@@ -73,13 +75,12 @@ override public function create():Void
 }
 ```
 
-Alterantively, you can import `FlxStudio` and then invoke `FlxStudio.create()`:
+Below is an example of a call in the document class:
 
 ```haxe
 package;
 
 import flixel.FlxGame;
-import flixel.addons.studio.FlxStudio;
 import openfl.display.Sprite;
 
 class Main extends Sprite
@@ -87,14 +88,11 @@ class Main extends Sprite
 	public function new():Void
 	{
 		super();
-		
 		addChild(new FlxGame(0, 0, MyInitialState));	
-		FlxStudio.create();
+		flixel.addons.studio.FlxStudio.create();
 	}
 }
 ```
-
-> **IMPORTANT: currently `flixel-studio` will only compile with the development version of HaxeFlixel (`version > 4.5.1`). Follow the inscructions on how to install HaxeFlixel development version [here](http://haxeflixel.com/documentation/install-development-flixel/).**
 
 ### 3. Usage (in-game editor)
 
