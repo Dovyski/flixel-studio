@@ -71,7 +71,7 @@ override public function create():Void
 
 	// [your own code here]
 
-	flixel.addons.studio.FlxStudio.start();
+	flixel.addons.studio.FlxStudio.create();
 }
 ```
 
