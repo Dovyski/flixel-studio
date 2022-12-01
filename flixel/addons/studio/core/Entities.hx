@@ -67,16 +67,16 @@ class Entities
 
 			var entity:Entity = null;
 
-			if (Std.is(member, FlxTypedEmitter))
+			if (Std.isOfType(member, FlxTypedEmitter))
 				entity = new Entity(EntityType.EMITTER, cast member, level);
-			else if (Std.is(member, FlxTilemap))
+			else if (Std.isOfType(member, FlxTilemap))
 				entity = new Entity(EntityType.TILEMAP, cast member, level);
-			else if (Std.is(member, FlxTypedGroup))
+			else if (Std.isOfType(member, FlxTypedGroup))
 			{
 				entity = new Entity(EntityType.GROUP, member, level);
 				entity.children = findItems((cast member).members, level + 1, maxLevel);
 			}
-			else if (Std.is(member, FlxSprite))
+			else if (Std.isOfType(member, FlxSprite))
 				entity = new Entity(EntityType.SPRITE, cast member, level);
 			
 			if (entity != null)
