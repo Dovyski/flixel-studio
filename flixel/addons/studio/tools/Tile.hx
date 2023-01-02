@@ -108,11 +108,11 @@ class Tile extends Tool
 
 			if (b != null && b.exists && b.alive && b.visible)
 			{
-				if (Std.is(b, FlxGroup))
+				if (Std.isOfType(b, FlxGroup))
 				{
 					target = findExistingTilemaps((cast b).members, tiles);
 				}
-				else if(Std.is(b, FlxTilemap))
+				else if(Std.isOfType(b, FlxTilemap))
 				{
 					target = cast(b, FlxTilemap);
 				}
